@@ -2,9 +2,10 @@ import telebot
 from telebot import apihelper
 import data
 #proxy
-apihelper.proxy = {'https': 'https://188.217.245.105:8118'}
+apihelper.proxy = {'https': data.get_proxy()}
 
-bot = telebot.TeleBot('966505306:AAHFTinGFcnYjZ7abFCZG9wAO47OkkAqkhI')
+
+bot = telebot.TeleBot(data.get_token())
 
 @bot.message_handler(commands=['start'])
 def start_message(message):
