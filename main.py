@@ -1,11 +1,10 @@
-
 import telebot
 from telebot import apihelper
 import keyboards
 import data
 import bd_def  # файл, в котором будут собраны функции для работы с базой данных
 
-#apihelper.proxy = {'https': data.get_proxy()}  # proxy
+apihelper.proxy = {'https': data.get_proxy()}  # proxy
 bot = telebot.TeleBot(data.get_token())  # инициализация бота
 
 def report(message, event): # отчет в pycharm об инициализации пользователя
@@ -19,7 +18,10 @@ def report(message, event): # отчет в pycharm об инициализац�
         print(message.chat.first_name + ' выбрал время для приоритета : '+message.text)
     elif event =="success of priority":
         print(message.chat.first_name + ' завершил выбирать приоритеты')
-
+    elif event == "note":
+        print(message.chat.first_name + " добавил заметку : "+ message.text)
+    elif event == "list of notes":
+        print(message.chat.first_name + " посмотрел список заметок")
 
 @bot.message_handler(commands=['start'])  # распознование команды /start
 def start_message(message):
@@ -37,7 +39,6 @@ def get_name(message):  # получение имени
     bot.send_message(message.from_user.id, 'Теперь по команде /category Вы можете установить свою категорию')
     report(message,'name')
     bd_def.add_user(user_id, username, firstname, secondname, name, 'None')  # добавление пользователя в базу данных
-
 
 @bot.message_handler(commands=['del_key'])
 def delete_keyboard(message):
@@ -59,7 +60,6 @@ def get_category(message):
         bot.send_message(message.chat.id,"Неверная категория, попробуйте снова")
         bot.register_next_step_handler(message, get_category)
 
-
 @bot.message_handler(commands=['priority'])
 def set_prioriry(message):
     bot.send_message(message.chat.id, "Выберите приоритеты:", reply_markup=keyboards.priority_key())
@@ -79,8 +79,6 @@ def get_priority(message):
         bot.send_message(message.chat.id, "Неверный приоритет, попробуйте снова")
         bot.register_next_step_handler(message, get_priority)
 
-
-
 def set_time(message):
     bot.send_message(message.chat.id, "Время принято", reply_markup=keyboards.delete_keyboard())
     bd_def.set_time(message.chat.id,message.text)
@@ -88,6 +86,26 @@ def set_time(message):
     bot.send_message(message.chat.id, "Выберите приоритеты:", reply_markup=keyboards.priority_key())
     bot.register_next_step_handler(message, get_priority)
 
+@bot.message_handler(commands=['notes'])
+def print_notes(message):
+    notes = []
+    notes = bd_def.print_notes((message.chat.id))
+    res = ''
+    count =1
+    for i in notes:
+        res += str(count)+'. ' + str(i) + '\n'
+        count+=1
+    bot.send_message(message.chat.id,res)
+    report(message,"list of notes")
+
+@bot.message_handler(content_types=['text'])
+def note(message):
+    bd_def.add_note(message.chat.id,message.chat.username,message.text)
+    bot.send_message(message.chat.id,"Заметка добавлена. По команде /notes Вы можете посмотреть все свои заметки")
+    report(message,"note")
+
+
 
 
 bot.polling()
+

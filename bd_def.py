@@ -44,3 +44,27 @@ def set_time(user_id,time):
     con.commit()
     cur.close()
     con.close()
+
+def add_note(user_id,username,note):
+    con = sqlite3.connect('./database.db')
+    cur = con.cursor()
+    cur.execute(
+        'CREATE TABLE IF NOT EXISTS notes' + str(user_id) + '(user_id INT, username TEXT, note TEXT, time TEXT)')
+    cur.execute('INSERT INTO notes' + str(user_id) + ' VALUES(' + str(user_id) + ',"' + str(username) + '","' + note + '","None")')
+    con.commit()
+    cur.close()
+    con.close()
+
+def print_notes(user_id):
+    con = sqlite3.connect('./database.db')
+    cur = con.cursor()
+    cur.execute('SELECT note FROM notes' + str(user_id))
+    rows = cur.fetchall()
+    notes = []
+    for row in rows:
+        row = str(row)
+        row = row[2:]
+        l = len(row)
+        row = row[:(l - 3)]
+        notes.append(row)
+    return notes

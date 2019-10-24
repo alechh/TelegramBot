@@ -5,7 +5,7 @@ def category_key():
     c1 = types.KeyboardButton('Студент')
     c2 = types.KeyboardButton('Школьник')
     c3 = types.KeyboardButton('Работающий')
-    c4 = types.KeyboardButton('Безделник')
+    c4 = types.KeyboardButton('Бездельник')
     markup.add(c1, c2, c3, c4)
     return markup
 def delete_keyboard():
