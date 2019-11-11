@@ -2,12 +2,14 @@ import telebot
 from telebot import apihelper
 import keyboards
 import data
+import time
+import datetime
 import bd_def  # файл, в котором будут собраны функции для работы с базой данных
 
-apihelper.proxy = {'https': data.get_proxy()}  # proxy
+#apihelper.proxy = {'https': data.get_proxy()}  # proxy
 bot = telebot.TeleBot(data.get_token())  # инициализация бота
 
-def report(message, event): # отчет в pycharm об инициализации пользователя
+def report(message, event,time=None, prior=None): # отчет в pycharm об инициализации пользователя
     if event == 'name':
         print(message.chat.first_name + ' просит называть себя : ' + message.text)  # вывод сообщения в консоль pycharm
     elif event == 'category':
@@ -22,6 +24,8 @@ def report(message, event): # отчет в pycharm об инициализац�
         print(message.chat.first_name + " добавил заметку : "+ message.text)
     elif event == "list of notes":
         print(message.chat.first_name + " посмотрел список заметок")
+    elif event == "message by time":
+        print(message.chat.first_name + " получил сообщение " +prior+" по времени " + time)
 
 @bot.message_handler(commands=['start'])  # распознование команды /start
 def start_message(message):
@@ -97,6 +101,21 @@ def print_notes(message):
         count+=1
     bot.send_message(message.chat.id,res)
     report(message,"list of notes")
+
+@bot.message_handler(commands={'test'})
+def mes(message):
+    while True:
+        min = datetime.datetime.now().minute
+        hour = datetime.datetime.now().hour
+        if (min < 10):
+            min = '0' + str(min)
+        current_time = str(hour) + ':' + str(min)
+        info = bd_def.get_prior()
+        for i in range(len(info)):
+            if(info[i][2] == current_time):
+                bot.send_message(info[i][0],info[i][1])
+                report(message,'message by time',current_time,info[i][1])
+        time.sleep(60)
 
 @bot.message_handler(content_types=['text'])
 def note(message):

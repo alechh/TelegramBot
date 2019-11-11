@@ -8,4 +8,4 @@ def sasha_chat_id():
 
 
 def get_proxy():
-    return 'https://157.245.0.181:3128'
+    return 'https://13.69.22.40:8080'

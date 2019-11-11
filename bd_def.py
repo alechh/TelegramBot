@@ -1,5 +1,5 @@
-    #библиотека для работы с базой данных
 import sqlite3
+
 
     #добавление пользователя в базу данных
 def add_user(user_id,username,firstname,secondname,name,category):
@@ -29,9 +29,9 @@ def create_perfonal_bd(user_id,username,priority):
     cur = con.cursor()
     # создание таблицы, если она еще не создана
     cur.execute(
-        'CREATE TABLE IF NOT EXISTS prior'+ str(user_id) +'(user_id INT, username TEXT, priority TEXT, time TEXT)')
+        'CREATE TABLE IF NOT EXISTS prior'+'(user_id INT, username TEXT, priority TEXT, time TEXT)')
     # добавление пользователя в таблицу
-    cur.execute('INSERT INTO prior'+ str(user_id) +' VALUES(' + str(user_id) + ',"' + str(username) + '","'+priority+'","None")')
+    cur.execute('INSERT INTO prior'+' VALUES(' + str(user_id) + ',"' + str(username) + '","'+priority+'","None")')
     # сохранение изменений в базе данных
     con.commit()
     # отключение от базы данных
@@ -40,7 +40,7 @@ def create_perfonal_bd(user_id,username,priority):
 def set_time(user_id,time):
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
-    cur.execute('UPDATE prior'+ str(user_id)+' SET time = "'+str(time) +'" WHERE user_id ='+str(user_id) +' and time="None"')
+    cur.execute('UPDATE prior'+' SET time = "'+str(time) +'" WHERE user_id ='+str(user_id) +' and time="None"')
     con.commit()
     cur.close()
     con.close()
@@ -68,3 +68,17 @@ def print_notes(user_id):
         row = row[:(l - 3)]
         notes.append(row)
     return notes
+
+def get_prior():
+    con = sqlite3.connect('./database.db')
+    cur = con.cursor()
+    cur.execute('SELECT user_id,priority,time FROM prior')
+    rows = cur.fetchall()
+    size = len(rows)
+    info = []
+    for i in range(size):
+        info.append([])
+        for j in range(3):
+            info[i].append(rows[i][j])
+    return info
+
