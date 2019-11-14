@@ -6,11 +6,16 @@ import time
 import datetime
 import bd_def
 
-apihelper.proxy = {'https': data.get_proxy()}  # proxy
+#apihelper.proxy = {'https': data.get_proxy()}  # proxy
 bot = telebot.TeleBot(data.get_token())  # инициализация бота
 q = True # глобальная переменная для корректной работы цикла с проверкой времени
 
-def report(message, event,time=None, prior=None): # отчет в pycharm об инициализации пользователя
+@bot.message_handler(commands=['test'])
+def test(message):
+    bd_def.table_exists('lol')
+    bd_def.table_exists('users')
+
+def report(message, event,time=None, prior=None): # отчет в консоль об инициализации пользователя
     if event == 'name':
         print(message.chat.first_name + ' просит называть себя : ' + message.text)
     elif event == 'category':
@@ -66,11 +71,11 @@ def get_category(message):
         bot.register_next_step_handler(message, get_category)
 
 @bot.message_handler(commands=['priority'])
-def set_prioriry(message):
+def start_prioriry(message):
     bot.send_message(message.chat.id, "Выберите приоритеты:", reply_markup=keyboards.priority_key())
     bot.register_next_step_handler(message, get_priority)
 
-def get_priority(message):
+def set_priority(message):
     if(message.text == "Завершить"):
         bot.send_message(message.chat.id, "Мы Вас запомнили",reply_markup=keyboards.delete_keyboard())
         global k
@@ -97,6 +102,13 @@ def set_time(message):
 
 @bot.message_handler(commands=['notes'])
 def print_notes(message):
+    if (not bd_def.table_exists('notes'+ str(message.chat.id))):
+        bot.send_message(message.chat.id,"У вас нет заметок")
+        return 0
+    count = bd_def.number_of_notes(message)
+    if(count==0):
+        bot.send_message(message.chat.id,"У вас нет заметок")
+        return 0
     notes = []
     notes = bd_def.print_notes((message.chat.id))
     res = ''
@@ -107,6 +119,7 @@ def print_notes(message):
     bot.send_message(message.chat.id,res)
     report(message,"list of notes")
 
+@bot.message_handler(commands=['time'])
 def priority_message(message):
     global k
     k = True
@@ -129,10 +142,37 @@ def priority_message(message):
             time.sleep(1)
     print('Конец цикла')
 
+@bot.message_handler(commands=['del_notes'])
+def start_del_nodes(message):
+    print_notes(message)
+    bot.send_message(message.chat.id, "Введите номер заметки, которую хотите удалить")
+    bot.register_next_step_handler(message, del_notes)
+
+def del_notes(message):
+    count = bd_def.number_of_notes(message)
+    if(message.text == "Завершить"):
+        bot.send_message(message.chat.id, "Готово", reply_markup=keyboards.delete_keyboard())
+        return 0
+    elif (message.text.isdigit() and int(message.text) <= count):
+        bd_def.delete_note(message)
+        if count ==1 :
+            bot.send_message(message.chat.id, "Готово", reply_markup=keyboards.delete_keyboard())
+            return 0
+        print_notes(message)
+        bot.send_message(message.chat.id, "Введите следующий номер или нажмите Завершить", reply_markup=keyboards.del_notes_key())
+        bot.register_next_step_handler(message, del_notes)
+    else:
+        bot.send_message(message.chat.id, "Должно быть натуральное число")
+        bot.register_next_step_handler(message, del_notes)
+
 @bot.message_handler(content_types=['text'])
 def note(message):
-    bd_def.add_note(message.chat.id,message.chat.username,message.text)
-    bot.send_message(message.chat.id,"Заметка добавлена. По команде /notes Вы можете посмотреть все свои заметки")
+    try:
+        number = bd_def.number_of_notes(message)
+    except:
+        number = 0
+    bd_def.add_note(number+1,message.chat.id,message.chat.username,message.text)
+    bot.send_message(message.chat.id,"Заметка добавлена. \n/notes - посмотреть заметки \n/del_notes - удалить заметки")
     report(message,"note")
 
 bot.polling()

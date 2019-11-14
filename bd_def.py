@@ -31,7 +31,7 @@ def create_perfonal_bd(user_id,username,priority):
     cur.execute(
         'CREATE TABLE IF NOT EXISTS prior'+'(user_id INT, username TEXT, priority TEXT, time TEXT)')
     # добавление пользователя в таблицу
-    cur.execute('INSERT INTO prior'+' VALUES(' + str(user_id) + ',"' + str(username) + '","'+priority+'","None")')
+    cur.execute('INSERT INTO prior VALUES(' + str(user_id) + ',"' + str(username) + '","'+priority+'","None")')
     # сохранение изменений в базе данных
     con.commit()
     # отключение от базы данных
@@ -40,17 +40,17 @@ def create_perfonal_bd(user_id,username,priority):
 def set_time(user_id,time):
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
-    cur.execute('UPDATE prior'+' SET time = "'+str(time) +'" WHERE user_id ='+str(user_id) +' and time="None"')
+    cur.execute('UPDATE prior SET time = "'+str(time) +'" WHERE user_id ='+str(user_id) +' and time="None"')
     con.commit()
     cur.close()
     con.close()
 
-def add_note(user_id,username,note):
+def add_note(number,user_id,username,note):
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute(
-        'CREATE TABLE IF NOT EXISTS notes' + str(user_id) + '(user_id INT, username TEXT, note TEXT, time TEXT)')
-    cur.execute('INSERT INTO notes' + str(user_id) + ' VALUES(' + str(user_id) + ',"' + str(username) + '","' + note + '","None")')
+        'CREATE TABLE IF NOT EXISTS notes' + str(user_id) + '(number INT,user_id INT, username TEXT, note TEXT, time TEXT)')
+    cur.execute('INSERT INTO notes' + str(user_id) + ' VALUES(' + str(number) +',' + str(user_id) + ',"' + str(username) + '","' + note + '","None")')
     con.commit()
     cur.close()
     con.close()
@@ -82,3 +82,42 @@ def get_prior():
             info[i].append(rows[i][j])
     return info
 
+def number_of_notes(message): # кол-во заметок пользователя
+    con = sqlite3.connect('./database.db')
+    cur = con.cursor()
+    cur.execute('SELECT COUNT(*) FROM notes' + str(message.chat.id))
+    count = str(cur.fetchall())
+    count = count[2:]
+    l = len(count)
+    count = count[:(l - 3)]
+    return int(count)
+
+def delete_note(message):
+    con = sqlite3.connect('./database.db')
+    cur = con.cursor()
+    cur.execute('SELECT COUNT(*) FROM notes' + str(message.chat.id))
+    count = str(cur.fetchall())
+    count = count[2:]
+    l = len(count)
+    count = count[:(l - 3)]
+    count = int(count)
+    cur.execute('DELETE FROM notes' +str(message.chat.id) + ' WHERE number=' + message.text)
+    i = int(message.text)+1
+    print(i)
+    print(count)
+    while i<=count:
+        cur.execute(
+            'UPDATE notes' +str(message.chat.id) + ' SET number = ' + str(i-1) + ' WHERE number = ' + str(i))
+        i = i + 1
+    con.commit()
+    cur.close()
+    con.close()
+
+def table_exists(name): # проверка на существование таблицы
+    con = sqlite3.connect('./database.db')
+    cur = con.cursor()
+    cur.execute('SELECT name FROM sqlite_master WHERE type=\'table\' AND name=\''+name + '\';')
+    res = cur.fetchall()
+    if(len(res) == 0) :
+        return False
+    return True
