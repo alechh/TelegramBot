@@ -24,14 +24,14 @@ def set_category(user_id,category):
     cur.close()
     con.close()
 
-def create_perfonal_bd(user_id,username,priority):
+def create_perfonal_bd(number,user_id,username,priority):
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     # создание таблицы, если она еще не создана
     cur.execute(
-        'CREATE TABLE IF NOT EXISTS prior'+'(user_id INT, username TEXT, priority TEXT, time TEXT)')
+        'CREATE TABLE IF NOT EXISTS prior(number INT,user_id INT, username TEXT, priority TEXT, time TEXT)')
     # добавление пользователя в таблицу
-    cur.execute('INSERT INTO prior VALUES(' + str(user_id) + ',"' + str(username) + '","'+priority+'","None")')
+    cur.execute('INSERT INTO prior VALUES(' +str(number) +',' + str(user_id) + ',"' + str(username) + '","'+priority+'","None")')
     # сохранение изменений в базе данных
     con.commit()
     # отключение от базы данных
@@ -103,8 +103,6 @@ def delete_note(message):
     count = int(count)
     cur.execute('DELETE FROM notes' +str(message.chat.id) + ' WHERE number=' + message.text)
     i = int(message.text)+1
-    print(i)
-    print(count)
     while i<=count:
         cur.execute(
             'UPDATE notes' +str(message.chat.id) + ' SET number = ' + str(i-1) + ' WHERE number = ' + str(i))
@@ -121,3 +119,45 @@ def table_exists(name): # проверка на существование та�
     if(len(res) == 0) :
         return False
     return True
+
+def print_priority(user_id):
+    con = sqlite3.connect('./database.db')
+    cur = con.cursor()
+    cur.execute('SELECT priority,time FROM prior WHERE user_id='+ str(user_id))
+    rows = cur.fetchall()
+    size = len(rows)
+    info = []
+    for i in range(size):
+        info.append([])
+        for j in range(2):
+            info[i].append(rows[i][j])
+    return info
+
+def number_of_priority(message): # кол-во приоритетов пользователя
+    con = sqlite3.connect('./database.db')
+    cur = con.cursor()
+    cur.execute('SELECT COUNT(*) FROM prior WHERE user_id='+ str(message.chat.id) )
+    count = str(cur.fetchall())
+    count = count[2:]
+    l = len(count)
+    count = count[:(l - 3)]
+    return int(count)
+
+def delete_priority(message):
+    con = sqlite3.connect('./database.db')
+    cur = con.cursor()
+    cur.execute('SELECT COUNT(*) FROM prior WHERE user_id=' + str(message.chat.id))
+    count = str(cur.fetchall())
+    count = count[2:]
+    l = len(count)
+    count = count[:(l - 3)]
+    count = int(count)
+    cur.execute('DELETE FROM prior WHERE user_id='+str(message.chat.id)+' and number=' + message.text)
+    i = int(message.text)+1
+    while i<=count:
+        cur.execute(
+            'UPDATE prior SET number = ' + str(i-1) + ' WHERE number = ' + str(i) +' and user_id='+ str(message.chat.id))
+        i = i + 1
+    con.commit()
+    cur.close()
+    con.close()

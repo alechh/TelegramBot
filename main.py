@@ -1,5 +1,5 @@
 import telebot
-from telebot import apihelper
+#from telebot import apihelper
 import keyboards
 import data
 import time
@@ -10,12 +10,7 @@ import bd_def
 bot = telebot.TeleBot(data.get_token())  # инициализация бота
 q = True # глобальная переменная для корректной работы цикла с проверкой времени
 
-@bot.message_handler(commands=['test'])
-def test(message):
-    bd_def.table_exists('lol')
-    bd_def.table_exists('users')
-
-def report(message, event,time=None, prior=None): # отчет в консоль об инициализации пользователя
+def report(message, event,text=None, prior=None): # отчет в консоль об инициализации пользователя
     if event == 'name':
         print(message.chat.first_name + ' просит называть себя : ' + message.text)
     elif event == 'category':
@@ -31,7 +26,15 @@ def report(message, event,time=None, prior=None): # отчет в консоль
     elif event == "list of notes":
         print(message.chat.first_name + " посмотрел список заметок")
     elif event == "message by priority":
-        print(message.chat.first_name + " получил сообщение " +prior+" по времени " + time)
+        print(message.chat.first_name + " получил сообщение " +prior+" по времени " + text)
+    elif event == "delete note":
+        print(message.chat.first_name + " удалил заметку")
+    elif event == 'not notes':
+        print('У '+ message.chat.first_name +' нет заметок')
+    elif event == 'delete priority':
+        print(message.chat.first_name + ' удалил приоритет')
+    elif event == 'not priority':
+        print('У ' + message.chat.first_name + ' нет приоритетов')
 
 @bot.message_handler(commands=['start'])  # распознование команды /start
 def start_message(message):
@@ -46,7 +49,7 @@ def get_name(message):  # получение имени
     firstname = str(message.chat.first_name)
     secondname = str(message.chat.last_name)
     bot.send_message(message.from_user.id, 'Хорошо, я запомню, что тебя зовут ' + name)
-    bot.send_message(message.from_user.id, 'Теперь по команде /category Вы можете установить свою категорию')
+    bot.send_message(message.from_user.id, 'Теперь по команде /set_category Вы можете установить свою категорию')
     report(message,'name')
     bd_def.add_user(user_id, username, firstname, secondname, name, 'None')  # добавление пользователя в базу данных
 
@@ -54,30 +57,30 @@ def get_name(message):  # получение имени
 def delete_keyboard(message):
     bot.send_message(message.chat.id, "Клавиатура удалена ", reply_markup=keyboards.delete_keyboard())
 
-@bot.message_handler(commands=['category'])
+@bot.message_handler(commands=['set_category'])
 def start_category(message):
     bot.send_message(message.from_user.id, 'К какой категории вы относитесь?')
     bot.send_message(message.from_user.id, "Выбирите категорию:", reply_markup=keyboards.category_key())
-    bot.register_next_step_handler(message, get_category)
+    bot.register_next_step_handler(message, set_category)
 
-def get_category(message):
+def set_category(message):
     category = message.text
     if (message.text == 'Студент' or message.text == 'Школьник' or message.text == 'Работающий' or message.text == 'Бездельник'):
-        bot.send_message(message.chat.id,"Замечательно, теперь по команде /priority Вы можете выбрать приоритеты", reply_markup=keyboards.delete_keyboard())
+        bot.send_message(message.chat.id,"Замечательно, теперь по команде /set_priority Вы можете выбрать приоритеты", reply_markup=keyboards.delete_keyboard())
         bd_def.set_category(message.chat.id, category)
         report(message,'category')
     else:
         bot.send_message(message.chat.id,"Неверная категория, попробуйте снова")
-        bot.register_next_step_handler(message, get_category)
+        bot.register_next_step_handler(message, set_category)
 
-@bot.message_handler(commands=['priority'])
+@bot.message_handler(commands=['set_priority'])
 def start_prioriry(message):
     bot.send_message(message.chat.id, "Выберите приоритеты:", reply_markup=keyboards.priority_key())
-    bot.register_next_step_handler(message, get_priority)
+    bot.register_next_step_handler(message, set_priority)
 
 def set_priority(message):
     if(message.text == "Завершить"):
-        bot.send_message(message.chat.id, "Мы Вас запомнили",reply_markup=keyboards.delete_keyboard())
+        bot.send_message(message.chat.id, "Готово \n /show_priority - посмотреть приоритеты \n /del_priority - удалить приоритеты",reply_markup=keyboards.delete_keyboard())
         global k
         k = False
         time.sleep(2)
@@ -86,28 +89,34 @@ def set_priority(message):
         return 0
     elif (message.text == "Экзамены" or message.text == "Изучение языков" or message.text =="Путешествие" or message.text=="Спорт"):
         report(message,'priority')
-        bd_def.create_perfonal_bd(message.chat.id,message.chat.username,message.text)
+        try:
+            number = bd_def.number_of_priority(message)
+        except:
+            number = 0
+        bd_def.create_perfonal_bd(number+1,message.chat.id,message.chat.username,message.text)
         bot.send_message(message.chat.id, "Выберите время:", reply_markup=keyboards.time_key())
         bot.register_next_step_handler(message, set_time)
     else:
         bot.send_message(message.chat.id, "Неверный приоритет, попробуйте снова")
-        bot.register_next_step_handler(message, get_priority)
+        bot.register_next_step_handler(message, set_priority)
 
 def set_time(message):
     bot.send_message(message.chat.id, "Время принято", reply_markup=keyboards.delete_keyboard())
     bd_def.set_time(message.chat.id,message.text)
     report(message,'time of priority')
     bot.send_message(message.chat.id, "Выберите приоритеты:", reply_markup=keyboards.priority_key())
-    bot.register_next_step_handler(message, get_priority)
+    bot.register_next_step_handler(message, set_priority)
 
 @bot.message_handler(commands=['notes'])
 def print_notes(message):
     if (not bd_def.table_exists('notes'+ str(message.chat.id))):
         bot.send_message(message.chat.id,"У вас нет заметок")
+        report(message,'not notes')
         return 0
     count = bd_def.number_of_notes(message)
     if(count==0):
         bot.send_message(message.chat.id,"У вас нет заметок")
+        report(message,'not notes')
         return 0
     notes = []
     notes = bd_def.print_notes((message.chat.id))
@@ -144,6 +153,15 @@ def priority_message(message):
 
 @bot.message_handler(commands=['del_notes'])
 def start_del_nodes(message):
+    if (not bd_def.table_exists('notes'+ str(message.chat.id))):
+        bot.send_message(message.chat.id,"У вас нет заметок")
+        report(message,'not notes')
+        return 0
+    count = bd_def.number_of_notes(message)
+    if (count == 0):
+        bot.send_message(message.chat.id, "У вас нет заметок")
+        report(message, 'not notes')
+        return 0
     print_notes(message)
     bot.send_message(message.chat.id, "Введите номер заметки, которую хотите удалить")
     bot.register_next_step_handler(message, del_notes)
@@ -155,15 +173,61 @@ def del_notes(message):
         return 0
     elif (message.text.isdigit() and int(message.text) <= count):
         bd_def.delete_note(message)
+        report(message,'delete note')
         if count ==1 :
             bot.send_message(message.chat.id, "Готово", reply_markup=keyboards.delete_keyboard())
             return 0
         print_notes(message)
-        bot.send_message(message.chat.id, "Введите следующий номер или нажмите Завершить", reply_markup=keyboards.del_notes_key())
+        bot.send_message(message.chat.id, "Введите следующий номер или нажмите Завершить", reply_markup=keyboards.complete_key())
         bot.register_next_step_handler(message, del_notes)
     else:
         bot.send_message(message.chat.id, "Должно быть натуральное число")
         bot.register_next_step_handler(message, del_notes)
+
+@bot.message_handler(commands=['show_priority'])
+def print_priorities(message):
+    if (not bd_def.table_exists('prior')):
+        bot.send_message(message.chat.id,"У вас нет выбранных приоритетов")
+        report(message,'not priority')
+        return 0
+    info = bd_def.print_priority(message.chat.id)
+    if (len(info) == 0):
+        bot.send_message(message.chat.id, "У вас нет выбранных приоритетов")
+        report(message,'not priority')
+        return 0
+    res = ''
+    for i in range(len(info)):
+        res = res +str(i+1)+'. '+ info[i][0] + ' ('+info[i][1]+')\n'
+    bot.send_message(message.chat.id,res)
+
+@bot.message_handler(commands=['del_priority'])
+def start_del_priority(message):
+    count = bd_def.number_of_priority(message)
+    if (count == 0):
+        bot.send_message(message.chat.id, "У вас нет выбранных приоритетов")
+        report(message,'not priority')
+        return 0
+    print_priorities(message)
+    bot.send_message(message.chat.id, "Введите номер приоритета, который хотите удалить")
+    bot.register_next_step_handler(message, del_priority)
+
+def del_priority(message):
+    count = bd_def.number_of_priority(message)
+    if(message.text == "Завершить"):
+        bot.send_message(message.chat.id, "Готово", reply_markup=keyboards.delete_keyboard())
+        return 0
+    elif (message.text.isdigit() and int(message.text) <= count):
+        bd_def.delete_priority(message)
+        report(message,'delete priority')
+        if count == 1 :
+            bot.send_message(message.chat.id, "Готово", reply_markup=keyboards.delete_keyboard())
+            return 0
+        print_priorities(message)
+        bot.send_message(message.chat.id, "Введите следующий номер или нажмите Завершить", reply_markup=keyboards.complete_key())
+        bot.register_next_step_handler(message, del_priority)
+    else:
+        bot.send_message(message.chat.id, "Должно быть натуральное число")
+        bot.register_next_step_handler(message, del_priority())
 
 @bot.message_handler(content_types=['text'])
 def note(message):

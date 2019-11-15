@@ -29,7 +29,7 @@ def time_key():
     markup.add(c1, c2, c3, c4)
     return markup
 
-def del_notes_key():
+def complete_key():
     markup= types.ReplyKeyboardMarkup(resize_keyboard=True)  # клавиатура
     c1 = types.KeyboardButton('Завершить')
     markup.add(c1)
