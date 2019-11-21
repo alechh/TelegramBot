@@ -36,6 +36,23 @@ def report(message, event,text=None, prior=None): # отчет в консоль
     elif event == 'not priority':
         print('У ' + message.chat.first_name + ' нет приоритетов')
 
+def is_time_correct(message): #проверка правилности времени
+    time = message.text
+    l = len(time)
+    if (l ==5):
+        hour = time[:2]
+        min = time[3:]
+    elif (l==4):
+        hour = time[:1]
+        min = time[2:]
+    else:
+        error_time(message)
+        return 0
+    if (hour.isdigit() and min.isdigit() and int(hour) <24 and int(min) <60):
+        set_time(message)
+        return 0
+    error_time(message)
+
 @bot.message_handler(commands=['start'])  # распознование команды /start
 def start_message(message):
     bot.send_message(message.chat.id, 'Приветствую')
@@ -78,7 +95,7 @@ def start_prioriry(message):
     bot.send_message(message.chat.id, "Выберите приоритеты:", reply_markup=keyboards.priority_key())
     bot.register_next_step_handler(message, set_priority)
 
-def set_priority(message):
+def set_priority(message, q = True):
     if(message.text == "Завершить"):
         bot.send_message(message.chat.id, "Готово \n /show_priority - посмотреть приоритеты \n /del_priority - удалить приоритеты",reply_markup=keyboards.delete_keyboard())
         global k
@@ -87,25 +104,27 @@ def set_priority(message):
         priority_message(message) #запуск цикла с проверкой времени
         report(message,'success of priority')
         return 0
-    elif (message.text == "Экзамены" or message.text == "Изучение языков" or message.text =="Путешествие" or message.text=="Спорт"):
-        report(message,'priority')
-        try:
-            number = bd_def.number_of_priority(message)
-        except:
-            number = 0
-        bd_def.create_perfonal_bd(number+1,message.chat.id,message.chat.username,message.text)
-        bot.send_message(message.chat.id, "Выберите время:", reply_markup=keyboards.time_key())
-        bot.register_next_step_handler(message, set_time)
     else:
-        bot.send_message(message.chat.id, "Неверный приоритет, попробуйте снова")
-        bot.register_next_step_handler(message, set_priority)
+        if (q):
+            report(message,'priority')
+            try:
+                number = bd_def.number_of_priority(message)
+            except:
+                number = 0
+            bd_def.create_perfonal_bd(number+1,message.chat.id,message.chat.username,message.text)
+        bot.send_message(message.chat.id, "Выберите или введите время", reply_markup=keyboards.time_key())
+        bot.register_next_step_handler(message, is_time_correct)
 
 def set_time(message):
     bot.send_message(message.chat.id, "Время принято", reply_markup=keyboards.delete_keyboard())
     bd_def.set_time(message.chat.id,message.text)
     report(message,'time of priority')
-    bot.send_message(message.chat.id, "Выберите приоритеты:", reply_markup=keyboards.priority_key())
-    bot.register_next_step_handler(message, set_priority)
+
+
+@bot.message_handler(commands=['time_error'])
+def error_time(message): #нужная функция для проверки времени на корректность
+    bot.send_message(message.chat.id,"Неверный формат времени")
+    set_priority(message,False)
 
 @bot.message_handler(commands=['notes'])
 def print_notes(message):
@@ -171,7 +190,7 @@ def del_notes(message):
     if(message.text == "Завершить"):
         bot.send_message(message.chat.id, "Готово", reply_markup=keyboards.delete_keyboard())
         return 0
-    elif (message.text.isdigit() and int(message.text) <= count):
+    elif (message.text.isdigit() and int(message.text) <= count and int(message.text)>0):
         bd_def.delete_note(message)
         report(message,'delete note')
         if count ==1 :
@@ -216,7 +235,7 @@ def del_priority(message):
     if(message.text == "Завершить"):
         bot.send_message(message.chat.id, "Готово", reply_markup=keyboards.delete_keyboard())
         return 0
-    elif (message.text.isdigit() and int(message.text) <= count):
+    elif (message.text.isdigit() and int(message.text) <= count and int(message.text) >0):
         bd_def.delete_priority(message)
         report(message,'delete priority')
         if count == 1 :
@@ -227,7 +246,7 @@ def del_priority(message):
         bot.register_next_step_handler(message, del_priority)
     else:
         bot.send_message(message.chat.id, "Должно быть натуральное число")
-        bot.register_next_step_handler(message, del_priority())
+        bot.register_next_step_handler(message, del_priority)
 
 @bot.message_handler(content_types=['text'])
 def note(message):
