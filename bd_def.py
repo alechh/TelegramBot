@@ -185,3 +185,14 @@ def update_user(user_id, username, firstname, secondname, name, category): # о�
     con.commit()
     cur.close()
     con.close()
+
+def get_category(user_id): # получение категории пользователя
+    con = sqlite3.connect('./database.db')
+    cur = con.cursor()
+    cur.execute('SELECT category FROM users WHERE user_id='+ str(user_id))
+    info = cur.fetchall()
+    info = str(info[0])
+    info = info[2:]
+    l = len(info)
+    info = info[:(l - 3)]
+    return info

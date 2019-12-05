@@ -10,11 +10,6 @@ import bd_def
 bot = telebot.TeleBot(data.get_token())  # инициализация бота
 q = True # глобальная переменная для корректной работы цикла с проверкой времени
 
-@bot.message_handler(commands=['test'])
-def test(message):
-    bd_def.user_exists('users','1')
-    bd_def.user_exists('users',message.chat.id)
-
 def report(message, event,text=None, prior=None): # отчет в консоль об инициализации пользователя
     if event == 'name':
         print(message.chat.first_name + ' просит называть себя : ' + message.text)
@@ -193,7 +188,7 @@ def start_del_nodes(message):
         bot.send_message(message.chat.id, "У вас нет заметок")
         report(message, 'not notes')
         return 0
-    get_notes(message)
+    print_notes(message)
     bot.send_message(message.chat.id, "Введите номер заметки, которую хотите удалить")
     bot.register_next_step_handler(message, del_notes)
 
@@ -260,6 +255,10 @@ def del_priority(message):
         bot.send_message(message.chat.id, "Должно быть натуральное число")
         bot.register_next_step_handler(message, del_priority)
 
+@bot.message_handler(commands=['category'])
+def print_category(message):
+    bot.send_message(message.chat.id,"Ваша категория : "+ bd_def.get_category(message.chat.id) + "\nИзменить категорию Вы можете по команде /set_category")
+
 @bot.message_handler(content_types=['text'])
 def note(message):
     try:
@@ -269,6 +268,8 @@ def note(message):
     bd_def.add_note(number+1,message.chat.id,message.chat.username,message.text)
     bot.send_message(message.chat.id,"Заметка добавлена. \n/notes - посмотреть заметки \n/del_notes - удалить заметки")
     report(message,"note")
+
+
 
 bot.polling()
 
