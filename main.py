@@ -95,7 +95,17 @@ def set_category(message):
 
 @bot.message_handler(commands=['set_priority'])
 def start_prioriry(message):
-    bot.send_message(message.chat.id, "Выберите приоритеты:", reply_markup=keyboards.priority_key())
+    category = bd_def.get_category(message.chat.id)
+    if (category == "Студент"):
+        bot.send_message(message.chat.id, "Выберите приоритеты:", reply_markup=keyboards.student_key())#HERE
+    elif (category == "Школьник"):
+        bot.send_message(message.chat.id, "Выберите приоритеты:", reply_markup=keyboards.schoolchild_key())
+    elif (category == "Бездельник"):
+        bot.send_message(message.chat.id, "Выберите приоритеты:", reply_markup=keyboards.idler_key())
+    elif (category == "Работающий"):
+        bot.send_message(message.chat.id, "Выберите приоритеты:", reply_markup=keyboards.worker_key())
+    else:
+        bot.send_message(message.chat.id,"Напишите ваш приоритет")
     bot.register_next_step_handler(message, set_priority)
 
 def set_priority(message, q = True):
@@ -203,7 +213,7 @@ def del_notes(message):
         if count ==1 :
             bot.send_message(message.chat.id, "Готово", reply_markup=keyboards.delete_keyboard())
             return 0
-        get_notes(message)
+        print_notes(message)
         bot.send_message(message.chat.id, "Введите следующий номер или нажмите Завершить", reply_markup=keyboards.complete_key())
         bot.register_next_step_handler(message, del_notes)
     else:
@@ -268,8 +278,6 @@ def note(message):
     bd_def.add_note(number+1,message.chat.id,message.chat.username,message.text)
     bot.send_message(message.chat.id,"Заметка добавлена. \n/notes - посмотреть заметки \n/del_notes - удалить заметки")
     report(message,"note")
-
-
 
 bot.polling()
 

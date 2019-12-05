@@ -11,12 +11,39 @@ def category_key():
 def delete_keyboard():
     markup = types.ReplyKeyboardRemove(selective=False)
     return markup
-def priority_key():
+def student_key():
     markup = types.ReplyKeyboardMarkup(row_width=2)  # клавиатура
     c1 = types.KeyboardButton('Экзамены')
     c2 = types.KeyboardButton('Изучение языков')
     c3 = types.KeyboardButton('Путешествие')
     c4 = types.KeyboardButton('Спорт')
+    c5 = types.KeyboardButton('Завершить')
+    markup.add(c1, c2, c3, c4,c5)
+    return markup
+def schoolchild_key():
+    markup = types.ReplyKeyboardMarkup(row_width=2)  # клавиатура
+    c1 = types.KeyboardButton('Уроки')
+    c2 = types.KeyboardButton('Спорт')
+    c3 = types.KeyboardButton('Саморазвитие')
+    c4 = types.KeyboardButton('Хобби')
+    c5 = types.KeyboardButton('Завершить')
+    markup.add(c1, c2, c3, c4,c5)
+    return markup
+def idler_key():
+    markup = types.ReplyKeyboardMarkup(row_width=2)  # клавиатура
+    c1 = types.KeyboardButton('Не ')
+    c2 = types.KeyboardButton('Знаю')
+    c3 = types.KeyboardButton('Что')
+    c4 = types.KeyboardButton('Посоветовать')
+    c5 = types.KeyboardButton('Завершить')
+    markup.add(c1, c2, c3, c4,c5)
+    return markup
+def worker_key():
+    markup = types.ReplyKeyboardMarkup(row_width=2)  # клавиатура
+    c1 = types.KeyboardButton('Хобби')
+    c2 = types.KeyboardButton('Повышение квалификации')
+    c3 = types.KeyboardButton('Путешествия')
+    c4 = types.KeyboardButton('Финансы')
     c5 = types.KeyboardButton('Завершить')
     markup.add(c1, c2, c3, c4,c5)
     return markup
