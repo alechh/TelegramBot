@@ -3,11 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="883e5a19-0095-4dde-812b-708663eac928" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bd_def.py" beforeDir="false" afterPath="$PROJECT_DIR$/bd_def.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database.db" beforeDir="false" afterPath="$PROJECT_DIR$/database.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -30,24 +29,18 @@
   </component>
   <component name="ProjectId" id="1Ryg2o8pmrCHWUR1MAQcgBXKeDw" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
   <component name="PropertiesComponent">
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="ToolWindowRun.ShowToolbar" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
-  </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
-      <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
-      </list>
-    </option>
   </component>
   <component name="RunManager">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
@@ -77,6 +70,18 @@
       </list>
     </recent_temporary>
   </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+  </component>
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -102,5 +107,43 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="381" y="27" width="642" height="741" key="#main" timestamp="1575532885952">
+      <screen x="49" y="27" width="1317" height="741" />
+    </state>
+    <state x="381" y="27" width="642" height="741" key="#main/49.27.1317.741@49.27.1317.741" timestamp="1575532885952" />
+    <state x="439" y="161" width="515" height="479" key="EnvironmentVariablesDialog" timestamp="1575532883907">
+      <screen x="49" y="27" width="1317" height="741" />
+    </state>
+    <state x="439" y="161" width="515" height="479" key="EnvironmentVariablesDialog/49.27.1317.741@49.27.1317.741" timestamp="1575532883907" />
+    <state width="1294" height="172" key="GridCell.Tab.0.bottom" timestamp="1575536763973">
+      <screen x="49" y="27" width="1317" height="741" />
+    </state>
+    <state width="1294" height="172" key="GridCell.Tab.0.bottom/49.27.1317.741@49.27.1317.741" timestamp="1575536763973" />
+    <state width="1294" height="172" key="GridCell.Tab.0.center" timestamp="1575536763973">
+      <screen x="49" y="27" width="1317" height="741" />
+    </state>
+    <state width="1294" height="172" key="GridCell.Tab.0.center/49.27.1317.741@49.27.1317.741" timestamp="1575536763973" />
+    <state width="1294" height="172" key="GridCell.Tab.0.left" timestamp="1575536763973">
+      <screen x="49" y="27" width="1317" height="741" />
+    </state>
+    <state width="1294" height="172" key="GridCell.Tab.0.left/49.27.1317.741@49.27.1317.741" timestamp="1575536763973" />
+    <state width="1294" height="172" key="GridCell.Tab.0.right" timestamp="1575536763973">
+      <screen x="49" y="27" width="1317" height="741" />
+    </state>
+    <state width="1294" height="172" key="GridCell.Tab.0.right/49.27.1317.741@49.27.1317.741" timestamp="1575536763973" />
+    <state x="196" y="31" width="1022" height="737" key="SettingsEditor" timestamp="1575532906591">
+      <screen x="49" y="27" width="1317" height="741" />
+    </state>
+    <state x="196" y="31" width="1022" height="737" key="SettingsEditor/49.27.1317.741@49.27.1317.741" timestamp="1575532906591" />
+    <state x="363" y="225" key="com.intellij.ide.util.TipDialog" timestamp="1575532826715">
+      <screen x="49" y="27" width="1317" height="741" />
+    </state>
+    <state x="363" y="225" key="com.intellij.ide.util.TipDialog/49.27.1317.741@49.27.1317.741" timestamp="1575532826715" />
+    <state x="370" y="89" key="search.everywhere.popup" timestamp="1575535899618">
+      <screen x="49" y="27" width="1317" height="741" />
+    </state>
+    <state x="370" y="89" key="search.everywhere.popup/49.27.1317.741@49.27.1317.741" timestamp="1575535899618" />
   </component>
 </project>

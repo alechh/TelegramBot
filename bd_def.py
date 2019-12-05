@@ -1,8 +1,6 @@
 import sqlite3
 
-
-    #добавление пользователя в базу данных
-def add_user(user_id,username,firstname,secondname,name,category):
+def add_user(user_id,username,firstname,secondname,name,category): # добавление пользователя в базу данных
         #подключение к базе данных
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
@@ -16,7 +14,7 @@ def add_user(user_id,username,firstname,secondname,name,category):
     cur.close()
     con.close()
 
-def set_category(user_id,category):
+def set_category(user_id,category):  # добавление категории пользователя
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('UPDATE OR IGNORE users SET category = "'+str(category) +'" WHERE user_id ='+str(user_id))
@@ -24,7 +22,7 @@ def set_category(user_id,category):
     cur.close()
     con.close()
 
-def create_perfonal_bd(number,user_id,username,priority):
+def set_priority(number,user_id,username,priority): # добавление приоритета польщователя
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     # создание таблицы, если она еще не создана
@@ -37,7 +35,8 @@ def create_perfonal_bd(number,user_id,username,priority):
     # отключение от базы данных
     cur.close()
     con.close()
-def set_time(user_id,time):
+
+def set_time(user_id,time): # установка времени для приоритета пользователя
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('UPDATE prior SET time = "'+str(time) +'" WHERE user_id ='+str(user_id) +' and time="None"')
@@ -45,7 +44,7 @@ def set_time(user_id,time):
     cur.close()
     con.close()
 
-def add_note(number,user_id,username,note):
+def add_note(number,user_id,username,note): # добавление заметки пользователя
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute(
@@ -55,7 +54,7 @@ def add_note(number,user_id,username,note):
     cur.close()
     con.close()
 
-def print_notes(user_id):
+def get_notes(user_id): # получение заметок пользователя
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT note FROM notes' + str(user_id))
@@ -69,7 +68,7 @@ def print_notes(user_id):
         notes.append(row)
     return notes
 
-def get_prior():
+def get_prior(): # получение приоритетов пользователя (для функции отправки уведомления по времени)
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT user_id,priority,time FROM prior')
@@ -92,7 +91,7 @@ def number_of_notes(message): # кол-во заметок пользовате�
     count = count[:(l - 3)]
     return int(count)
 
-def delete_note(message):
+def delete_note(message): # удаление заметки пользователя
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT COUNT(*) FROM notes' + str(message.chat.id))
@@ -120,7 +119,7 @@ def table_exists(name): # проверка на существование та�
         return False
     return True
 
-def print_priority(user_id):
+def get_priority(user_id): # получение приоритетов пользователя
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT priority,time FROM prior WHERE user_id='+ str(user_id))
@@ -143,7 +142,7 @@ def number_of_priority(message): # кол-во приоритетов польз
     count = count[:(l - 3)]
     return int(count)
 
-def delete_priority(message):
+def delete_priority(message): # удаление приоритетов
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT COUNT(*) FROM prior WHERE user_id=' + str(message.chat.id))
@@ -158,6 +157,31 @@ def delete_priority(message):
         cur.execute(
             'UPDATE prior SET number = ' + str(i-1) + ' WHERE number = ' + str(i) +' and user_id='+ str(message.chat.id))
         i = i + 1
+    con.commit()
+    cur.close()
+    con.close()
+
+def user_exists(table, user_id): # существует ли запись о пользоветеле с user_id в таблице table
+    con = sqlite3.connect('./database.db')
+    cur = con.cursor()
+    cur.execute('SELECT * FROM '+table+' WHERE user_id=' + str(user_id))
+    info = str(cur.fetchall())
+    if(len(info) == 2):
+        return False
+    else:
+        return True
+    cur.close()
+    con.close()
+
+def update_user(user_id, username, firstname, secondname, name, category): # обновить информацию о пользователе в таблице users
+    con = sqlite3.connect('./database.db')
+    cur = con.cursor()
+    cur.execute('UPDATE users SET username = "'+str(username) +'" WHERE user_id ='+str(user_id))
+    cur.execute('UPDATE users SET firstname = "'+str(firstname) +'" WHERE user_id ='+str(user_id))
+    cur.execute('UPDATE users SET secondname = "'+str(secondname) +'" WHERE user_id ='+str(user_id))
+    cur.execute('UPDATE users SET name = "'+str(name) +'" WHERE user_id ='+str(user_id))
+    cur.execute('UPDATE users SET name = "'+str(name) +'" WHERE user_id ='+str(user_id))
+    cur.execute('UPDATE users SET category = "'+str(category) +'" WHERE user_id ='+str(user_id))
     con.commit()
     cur.close()
     con.close()
