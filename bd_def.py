@@ -1,23 +1,23 @@
 import sqlite3
 
-def add_user(user_id,username,firstname,secondname,name,category): # добавление пользователя в базу данных
+def add_user(user_id,username,firstname,secondname,name,time): # добавление пользователя в базу данных
         #подключение к базе данных
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
         #создание таблицы, если она еще не создана
-    cur.execute('CREATE TABLE IF NOT EXISTS users(user_id INT, username TEXT, firstname TEXT, secondname TEXT, name TEXT,category TEXT, UNIQUE(user_id,username,firstname,secondname,name,category))')
+    cur.execute('CREATE TABLE IF NOT EXISTS users(user_id INT, username TEXT, firstname TEXT, secondname TEXT, name TEXT,time TEXT, UNIQUE(user_id,username,firstname,secondname,name,time))')
         #добавление пользователя в таблицу
-    cur.execute('INSERT OR IGNORE INTO users VALUES(' + str(user_id) + ',"' + username + '", "' + firstname + '", "' + secondname + '", "'+ name +'", "'+str(category)+'")')
+    cur.execute('INSERT OR IGNORE INTO users VALUES(' + str(user_id) + ',"' + username + '", "' + firstname + '", "' + secondname + '", "'+ name +'", "'+str(time)+'")')
         #сохранение изменений в базе данных
     con.commit()
         #отключение от базы данных
     cur.close()
     con.close()
 
-def set_category(user_id,category):  # добавление категории пользователя
+def set_user_time(user_id,time):  # добавление категории пользователя
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
-    cur.execute('UPDATE OR IGNORE users SET category = "'+str(category) +'" WHERE user_id ='+str(user_id))
+    cur.execute('UPDATE OR IGNORE users SET time = "'+str(time) +'" WHERE user_id ='+str(user_id))
     con.commit()
     cur.close()
     con.close()
@@ -173,7 +173,7 @@ def user_exists(table, user_id): # существует ли запись о п�
     cur.close()
     con.close()
 
-def update_user(user_id, username, firstname, secondname, name, category): # обновить информацию о пользователе в таблице users
+def update_user(user_id, username, firstname, secondname, name, time): # обновить информацию о пользователе в таблице users
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('UPDATE users SET username = "'+str(username) +'" WHERE user_id ='+str(user_id))
@@ -181,15 +181,15 @@ def update_user(user_id, username, firstname, secondname, name, category): # о�
     cur.execute('UPDATE users SET secondname = "'+str(secondname) +'" WHERE user_id ='+str(user_id))
     cur.execute('UPDATE users SET name = "'+str(name) +'" WHERE user_id ='+str(user_id))
     cur.execute('UPDATE users SET name = "'+str(name) +'" WHERE user_id ='+str(user_id))
-    cur.execute('UPDATE users SET category = "'+str(category) +'" WHERE user_id ='+str(user_id))
+    cur.execute('UPDATE users SET time = "'+str(time) +'" WHERE user_id ='+str(user_id))
     con.commit()
     cur.close()
     con.close()
 
-def get_category(user_id): # получение категории пользователя
+def get_user_time(user_id): # получение категории пользователя
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
-    cur.execute('SELECT category FROM users WHERE user_id='+ str(user_id))
+    cur.execute('SELECT time FROM users WHERE user_id='+ str(user_id))
     info = cur.fetchall()
     info = str(info[0])
     info = info[2:]

@@ -13,8 +13,6 @@ q = True # глобальная переменная для корректной
 def report(message, event,text=None, prior=None): # отчет в консоль об инициализации пользователя
     if event == 'name':
         print(message.chat.first_name + ' просит называть себя : ' + message.text)
-    elif event == 'category':
-        print(message.chat.first_name + ' выбрал категорию : ' + message.text)
     elif event == 'priority':
         print(message.chat.first_name + ' выбрал приоритет : '+ message.text)
     elif event =='time of priority':
@@ -36,7 +34,24 @@ def report(message, event,text=None, prior=None): # отчет в консоль
     elif event == 'not priority':
         print('У ' + message.chat.first_name + ' нет приоритетов')
 
-def is_time_correct(message): #проверка правилности времени
+def is_user_time_correct(message):
+    time = message.text
+    l = len(time)
+    if (l == 5):
+        hour = time[:2]
+        min = time[3:]
+    elif (l == 4):
+        hour = time[:1]
+        min = time[2:]
+    else:
+        error_user_time(message)
+        return 0
+    if (hour.isdigit() and min.isdigit() and int(hour) < 24 and int(min) < 60):
+        set_user_time(message)
+        return 0
+    error_user_time(message)
+
+def is_time_correct(message): #проверка правильности времени
     time = message.text
     l = len(time)
     if (l ==5):
@@ -66,46 +81,35 @@ def get_name(message):  # получение имени
     firstname = str(message.chat.first_name)
     secondname = str(message.chat.last_name)
     bot.send_message(message.from_user.id, 'Хорошо, я запомню, что тебя зовут ' + name)
-    bot.send_message(message.from_user.id, 'Теперь по команде /set_category Вы можете установить свою категорию')
     report(message,'name')
-    if(not bd_def.user_exists('users',message.chat.id)):
+    if (not bd_def.table_exists('users')):
+        bd_def.add_user(user_id, username, firstname, secondname, name, 'None')
+    elif(not bd_def.user_exists('users',message.chat.id)):
         bd_def.add_user(user_id, username, firstname, secondname, name, 'None')  # добавление пользователя в базу данных
     else:
         bd_def.update_user(user_id, username, firstname, secondname, name, 'None')
+    bot.send_message(message.from_user.id, '/set_priority - установить приоритеты \n /set_time - установить время отправки советов')
 
 @bot.message_handler(commands=['del_key'])
 def delete_keyboard(message):
     bot.send_message(message.chat.id, "Клавиатура удалена ", reply_markup=keyboards.delete_keyboard())
 
-@bot.message_handler(commands=['set_category'])
-def start_category(message):
-    bot.send_message(message.from_user.id, 'К какой категории вы относитесь?')
-    bot.send_message(message.from_user.id, "Выбирите категорию:", reply_markup=keyboards.category_key())
-    bot.register_next_step_handler(message, set_category)
+@bot.message_handler(commands=['set_time'])
+def set_u_time(message):
+    bot.send_message(message.chat.id,"Введите время, когда вам было бы удобно получать советы. (например, 12:00)")
+    bot.register_next_step_handler(message, is_user_time_correct)
 
-def set_category(message):
-    category = message.text
-    if (message.text == 'Студент' or message.text == 'Школьник' or message.text == 'Работающий' or message.text == 'Бездельник'):
-        bot.send_message(message.chat.id,"Замечательно, теперь по команде /set_priority Вы можете выбрать приоритеты", reply_markup=keyboards.delete_keyboard())
-        bd_def.set_category(message.chat.id, category)
-        report(message,'category')
-    else:
-        bot.send_message(message.chat.id,"Неверная категория, попробуйте снова")
-        bot.register_next_step_handler(message, set_category)
+def set_user_time(message):
+    bot.send_message(message.chat.id, "Время принято (пока функция отправки советов не написана, программисты ленятся) \n /set_time - изменить время")
+    bd_def.set_user_time(message.chat.id,message.text)
+
+def error_user_time(message):
+    bot.send_message(message.chat.id, "Неверный формат времени.")
+    set_u_time(message)
 
 @bot.message_handler(commands=['set_priority'])
 def start_prioriry(message):
-    category = bd_def.get_category(message.chat.id)
-    if (category == "Студент"):
-        bot.send_message(message.chat.id, "Выберите приоритеты:", reply_markup=keyboards.student_key())#HERE
-    elif (category == "Школьник"):
-        bot.send_message(message.chat.id, "Выберите приоритеты:", reply_markup=keyboards.schoolchild_key())
-    elif (category == "Бездельник"):
-        bot.send_message(message.chat.id, "Выберите приоритеты:", reply_markup=keyboards.idler_key())
-    elif (category == "Работающий"):
-        bot.send_message(message.chat.id, "Выберите приоритеты:", reply_markup=keyboards.worker_key())
-    else:
-        bot.send_message(message.chat.id,"Напишите ваш приоритет")
+    bot.send_message(message.chat.id, "Выберите приоритеты:", reply_markup=keyboards.priority_key())
     bot.register_next_step_handler(message, set_priority)
 
 def set_priority(message, q = True):
@@ -136,7 +140,6 @@ def set_time(message):
     time.sleep(2)
     priority_message(message)
     report(message,'time of priority')
-
 
 @bot.message_handler(commands=['time_error'])
 def error_time(message): #нужная функция для проверки времени на корректность
@@ -264,10 +267,6 @@ def del_priority(message):
     else:
         bot.send_message(message.chat.id, "Должно быть натуральное число")
         bot.register_next_step_handler(message, del_priority)
-
-@bot.message_handler(commands=['category'])
-def print_category(message):
-    bot.send_message(message.chat.id,"Ваша категория : "+ bd_def.get_category(message.chat.id) + "\nИзменить категорию Вы можете по команде /set_category")
 
 @bot.message_handler(content_types=['text'])
 def note(message):
