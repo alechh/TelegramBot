@@ -186,7 +186,7 @@ def update_user(user_id, username, firstname, secondname, name, time): # обн�
     cur.close()
     con.close()
 
-def get_user_time(user_id): # получение категории пользователя
+def get_time_by_user_id(user_id):
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT time FROM users WHERE user_id='+ str(user_id))
@@ -195,4 +195,35 @@ def get_user_time(user_id): # получение категории пользо
     info = info[2:]
     l = len(info)
     info = info[:(l - 3)]
+    return info
+
+def get_from_bd(table, column): # колонки column из таблицы table
+    con = sqlite3.connect('./database.db')
+    cur = con.cursor()
+    cur.execute('SELECT '+column+' FROM ' + table)
+    rows = cur.fetchall()
+    info = []
+    for row in rows:
+        row = str(row)
+        row = row[1:]
+        l = len(row)
+        row = row[:(l-2)]
+        if(column == 'advice' or column == 'time'):
+            row = row[1:]
+            l = len(row)
+            row = row[:(l-1)]
+        info.append(row)
+    return info
+
+def get_users_time(): # получение приоритетов пользователя (для функции отправки уведомления по времени)
+    con = sqlite3.connect('./database.db')
+    cur = con.cursor()
+    cur.execute('SELECT user_id,time FROM users')
+    rows = cur.fetchall()
+    size = len(rows)
+    info = []
+    for i in range(size):
+        info.append([])
+        for j in range(2):
+            info[i].append(rows[i][j])
     return info
