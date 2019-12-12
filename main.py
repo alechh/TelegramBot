@@ -1,5 +1,4 @@
 import telebot
-#from telebot import apihelper
 import keyboards
 import data
 import time
@@ -7,9 +6,7 @@ import datetime
 import bd_def
 import random
 
-#apihelper.proxy = {'https': data.get_proxy()}  # proxy
-bot = telebot.TeleBot(data.get_token())  # инициализация бота
-#q = True # глобальная переменная для корректной работы цикла с проверкой времени
+bot = telebot.TeleBot(data.test_token())  # инициализация бота
 
 def report(message, event,text=None, prior=None): # отчет в консоль об инициализации пользователя
     if event == 'priority':
@@ -34,7 +31,6 @@ def report(message, event,text=None, prior=None): # отчет в консоль
         print(message.chat.first_name + ' установил время для советов ' + text)
     elif event == 'advice':
         print(message.chat.first_name + ' получил совет : ' + text)
-
 
 @bot.message_handler(commands=['message_to_users'])
 def start_mtou(message):
@@ -104,23 +100,23 @@ def set_u_time(message):
     bot.register_next_step_handler(message, is_user_time_correct)
 
 def set_user_time(message, q = True):
-    global adv_k
-    if (q):
+    if q:
         bd_def.set_user_time(message.chat.id,message.text)
         bot.send_message(message.chat.id, "Время принято\n /set_time - изменить время")
         report(message,'set_user_time',message.text)
-        adv_k = False
-        time.sleep(2)
-        send_advices(message)
-        return 0
     else:
         bd_def.set_user_time(message.chat.id, "None")
         bot.send_message(message.chat.id, "Готово")
         report(message,'set_user_time',"None")
-        adv_k = False
-        time.sleep(2)
-        send_advices(message)
-        return 0
+    global k
+    k = False
+    time.sleep(2)
+    priority_message(message)
+    '''global adv_k
+    adv_k = False
+    time.sleep(2)
+    send_advices(message)'''
+    return 0
 
 def error_user_time(message):
     bot.send_message(message.chat.id, "Неверный формат времени.")
@@ -160,7 +156,6 @@ def set_time(message):
     priority_message(message)
     report(message,'time of priority')
 
-@bot.message_handler(commands=['time_error'])
 def error_time(message): #нужная функция для проверки времени на корректность
     bot.send_message(message.chat.id,"Неверный формат времени")
     set_priority(message,False)
@@ -186,28 +181,36 @@ def print_notes(message):
     bot.send_message(message.chat.id,res)
     report(message,"list of notes")
 
+
 @bot.message_handler(commands=['priority_time'])
 def priority_message(message):
     global k
     k = True
-    print('Начало цикла приоритетов')
+    print('Начало цикла')
     while k:
         min = datetime.datetime.now().minute
         hour = datetime.datetime.now().hour
         if (min < 10):
             min = '0' + str(min)
         current_time = str(hour) + ':' + str(min)
-        print('Итерация приоритетов '+ current_time)
-        info = bd_def.get_prior()
-        for i in range(len(info)):
-            if(info[i][2] == current_time):
-                bot.send_message(info[i][0],info[i][1])
-                report(message,'message by priority',current_time,info[i][1])
+        print('Итерация '+ current_time)
+        info_prior = bd_def.get_prior()
+        info_user_time = bd_def.get_users_time()
+        for i in range(len(info_prior)):
+            if(info_prior[i][2] == current_time):
+                bot.send_message(info_prior[i][0],info_prior[i][1])
+                report(message,'message by priority',current_time,info_prior[i][1])
+        for i in range(len(info_user_time)):
+            if(info_user_time[i][1] == current_time):
+                advices = bd_def.get_from_bd('advices','advice')
+                rand = random.randint(0,len(advices)-1)
+                bot.send_message(info_user_time[i][0], advices[rand])
+                report(message,'advice',advices[rand])
         for i in range(60):
             if not k:
                 break
             time.sleep(1)
-    print('Конец цикла приоритетов')
+    print('Конец цикла')
 
 @bot.message_handler(commands=['del_notes'])
 def start_del_nodes(message):
@@ -258,6 +261,7 @@ def print_priorities(message):
         res = res +str(i+1)+'. '+ info[i][0] + ' ('+info[i][1]+')\n'
     bot.send_message(message.chat.id,res)
 
+
 @bot.message_handler(commands=['del_priority'])
 def start_del_priority(message):
     count = bd_def.number_of_priority(message)
@@ -287,7 +291,7 @@ def del_priority(message):
         bot.send_message(message.chat.id, "Должно быть натуральное число")
         bot.register_next_step_handler(message, del_priority)
 
-@bot.message_handler(commands=['advices_time'])
+'''@bot.message_handler(commands=['advices_time'])
 def send_advices(message):
     global adv_k
     adv_k = True
@@ -310,7 +314,7 @@ def send_advices(message):
             if not adv_k:
                 break
             time.sleep(1)
-    print('Конец цикла советов')
+    print('Конец цикла советов')'''
 
 
 
