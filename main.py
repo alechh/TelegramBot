@@ -6,7 +6,7 @@ import datetime
 import bd_def
 import random
 
-bot = telebot.TeleBot(data.test_token())  # инициализация бота
+bot = telebot.TeleBot(data.get_token())  # инициализация бота
 
 def report(message, event,text=None, prior=None): # отчет в консоль об инициализации пользователя
     if event == 'priority':
@@ -112,10 +112,6 @@ def set_user_time(message, q = True):
     k = False
     time.sleep(2)
     priority_message(message)
-    '''global adv_k
-    adv_k = False
-    time.sleep(2)
-    send_advices(message)'''
     return 0
 
 def error_user_time(message):
@@ -182,7 +178,7 @@ def print_notes(message):
     report(message,"list of notes")
 
 
-@bot.message_handler(commands=['priority_time'])
+@bot.message_handler(commands=['on'])
 def priority_message(message):
     global k
     k = True
@@ -290,33 +286,6 @@ def del_priority(message):
     else:
         bot.send_message(message.chat.id, "Должно быть натуральное число")
         bot.register_next_step_handler(message, del_priority)
-
-'''@bot.message_handler(commands=['advices_time'])
-def send_advices(message):
-    global adv_k
-    adv_k = True
-    print('Начало цикла cоветов')
-    while adv_k:
-        min = datetime.datetime.now().minute
-        hour = datetime.datetime.now().hour
-        if (min < 10):
-            min = '0' + str(min)
-        current_time = str(hour) + ':' + str(min)
-        print('Итерация советов '+ current_time)
-        info = bd_def.get_users_time()
-        for i in range(len(info)):
-            if(info[i][1] == current_time):
-                advices = bd_def.get_from_bd('advices','advice')
-                rand = random.randint(0,len(advices)-1)
-                bot.send_message(info[i][0], advices[rand])
-                report(message,'advice',advices[rand])
-        for i in range(60):
-            if not adv_k:
-                break
-            time.sleep(1)
-    print('Конец цикла советов')'''
-
-
 
 @bot.message_handler(content_types=['text'])
 def note(message):
