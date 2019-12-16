@@ -27,3 +27,9 @@ def complete_key():
     c1 = types.KeyboardButton('Завершить')
     markup.add(c1)
     return markup
+
+def as_note_key():
+    markup= types.ReplyKeyboardMarkup(resize_keyboard=True)  # клавиатура
+    c1 = types.KeyboardButton('Сохранить как заметку')
+    markup.add(c1)
+    return markup
