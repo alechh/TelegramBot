@@ -284,7 +284,6 @@ def get_advice_time(user_id):
     cur.execute('SELECT time FROM users WHERE user_id=' +str(user_id))
     time = cur.fetchall()
     time = str(time[0])
-    print(time)
     time = time[2:]
     l = len(time)
     time = time[:(l-3)]
@@ -296,7 +295,6 @@ def get_time_for_note(user_id,note):
     cur.execute('SELECT time FROM notes WHERE user_id=? AND note=?',(str(user_id),note))
     time = cur.fetchall()
     time = str(time[0])
-    print(time)
     time = time[2:]
     l = len(time)
     time = time[:(l-3)]

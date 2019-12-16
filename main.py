@@ -48,29 +48,74 @@ try:
             except:
                 print(i +' заблокировал бота')
 
-    def is_note_time_correct(message): #проверка на корректность времени для советов
+    def is_note_time_correct(message): #проверка на корректность времени для напоминаний
         time = message.text
         if(time == 'Сохранить как заметку'):
             just_note(message)
             bot.send_message(message.chat.id, "Готово\n/notes - посмотреть заметки\n/del_notes - удалить заметки",reply_markup=keyboards.delete_keyboard())
             return 0
-        l = len(time)
-        if (l == 5):
-            hour = time[:2]
-            min = time[3:]
-        elif (l == 4):
-            hour = time[:1]
-            min = time[2:]
-        elif (l==3):
-            hour = time[:1]
-            min = time[1:]
+        q = False
+        if(len(time) == 16):
+            cday = time[:2]
+            cmonth = time[3:]
+            cmonth = cmonth[:2]
+            cyear = time[6:]
+            cyear = cyear[:4]
+            chour = time[11:]
+            chour = chour[:2]
+            cmin = time[14:]
+            print(cmin)
+            q = True
+        elif(len(time)==15):
+            cday = time[:2]
+            cmonth = time[3:]
+            cmonth = cmonth[:2]
+            cyear = time[6:]
+            cyear = cyear[:4]
+            chour = time[11:]
+            chour = chour[:1]
+            cmin = time[13:]
+            q = True
+        elif (len(time) == 5):
+            chour = time[:2]
+            cmin = time[3:]
+            if(int(chour)<datetime.datetime.now().hour):
+                cday = str(datetime.datetime.now().day+1)
+            elif (int(chour)==datetime.datetime.now().hour and int(cmin)<= datetime.datetime.now().minute):
+                cday = str(datetime.datetime.now().day+1)
+            else:
+                cday = str(datetime.datetime.now().day)
+            cmonth = str(datetime.datetime.now().month)
+            cyear = str(datetime.datetime.now().year)
+
+            q = True
+        elif (len(time) == 4):
+            chour = time[:1]
+            cmin = time[2:]
+            if(int(chour)<datetime.datetime.now().hour):
+                cday = str(datetime.datetime.now().day+1)
+            elif (int(chour)==int(datetime.datetime.now().hour) and int(cmin)<= datetime.datetime.now().minute):
+                cday = str(datetime.datetime.now().day+1)
+            else:
+                cday = str(datetime.datetime.now().day)
+            cmonth = str(datetime.datetime.now().month)
+            cyear = str(datetime.datetime.now().year)
+            q = True
+        if(q and cmin.isdigit() and cmonth.isdigit()):
+            if (int(cmin) < 10 and int(cmin) != 0 and len(cmin)==1):
+                cmin = '0' + cmin
+            if (int(cmonth) < 10 and int(cmonth)!= 0 and len(cmonth)==1):
+                cmonth = '0' + cmonth
+        #l = len(time)
+        if(q):
+            if(cday.isdigit() and cmonth.isdigit() and cyear.isdigit() and chour.isdigit() and cmin.isdigit() and int(cyear) >2018 and int(cmonth)>0 and int(cmonth)<13 and int(cday)>0 and int(cday)<32 and int(chour)>=0 and int(chour)<24 and int(cmin)>=0 and int(cmin)<60 ):
+                set_note_time(message,cday+'.'+cmonth+'.'+cyear+' '+chour+':'+cmin)
+                return 0
         else:
             error_note_time(message)
             return 0
-        if (hour.isdigit() and min.isdigit() and int(hour) < 24 and int(min) < 60):
-            set_note_time(message)
-            return 0
         error_note_time(message)
+        return 0
 
     def is_user_time_correct(message): #проверка на корректность времени для советов
         time = message.text
@@ -230,10 +275,18 @@ try:
         while k:
             min = datetime.datetime.now().minute
             hour = datetime.datetime.now().hour
+            day = datetime.datetime.now().day
+            month = datetime.datetime.now().month
+            year = datetime.datetime.now().year
             if (min < 10):
                 min = '0' + str(min)
+            if(day <10):
+                day = '0'+str(day)
+            if(month<10):
+                month = '0'+str(month)
+            current_date= str(day)+'.'+str(month)+'.'+str(year)+' '+str(hour)+':'+str(min)
             current_time = str(hour) + ':' + str(min)
-            print('Итерация '+ current_time)
+            print('Итерация '+ current_date)
             info_prior = bd_def.get_prior()
             info_user_time = bd_def.get_users_time()
             info_note_time = bd_def.get_note_time()
@@ -254,7 +307,7 @@ try:
                     except:
                         print(str(info_user_time[i][0])+' заблокировал бота')
             for i in range(len(info_note_time)):
-                if(info_note_time[i][3] == current_time):
+                if(info_note_time[i][3] == current_date):
                     try:
                         bot.send_message(info_note_time[i][1],info_note_time[i][2])
                         bd_def.delete_note_time(info_note_time[i][0],str(info_note_time[i][1]),str(info_note_time[i][2]),info_note_time[i][3])
@@ -348,28 +401,27 @@ try:
             except:
                 number = 0
             bd_def.add_note(number+1,message.chat.id,message.chat.username,message.text)
-        bot.send_message(message.chat.id,"Введите время (например,12:00) или нажмите Сохранить как заметку",reply_markup=keyboards.as_note_key())
+        bot.send_message(message.chat.id,"Нажмите Сохранить как заметку или напишите, когда вам напомнить (ДД.ММ.ГГГГ ЧЧ:ММ)\n(если нужно напомнить в ближайшие сутки, то только время)",reply_markup=keyboards.as_note_key())
         bot.register_next_step_handler(message, is_note_time_correct)
 
-    def set_note_time(message):
+    def set_note_time(message,curtime):
         bot.send_message(message.chat.id, "Напоминание создано",reply_markup=keyboards.delete_keyboard())
-        ctime = message.text
-        if not ':' in ctime:
-            if len(ctime)==4:
-                h = ctime[:2]
-                m = ctime[2:]
-            elif len(ctime)==3:
-                h = ctime[:1]
-                m = ctime[1:]
-            ctime = h + ':' + m
-        bd_def.set_note_time(message.chat.id,ctime)
+        if not ':' in curtime:
+            if len(curtime)==4:
+                h = curtime[:2]
+                m = curtime[2:]
+            elif len(curtime)==3:
+                h = curtime[:1]
+                m = curtime[1:]
+            curtime = h + ':' + m
+        bd_def.set_note_time(message.chat.id,curtime)
         global k
         k = False
         time.sleep(2)
         notifications(message)
 
     def error_note_time(message):
-        bot.send_message(message.chat.id, "Неверный формат времени")
+        bot.send_message(message.chat.id, "Неверный формат даты или этот день уже прошел")
         note(message,False)
 
     def just_note(message):

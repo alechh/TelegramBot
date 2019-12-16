@@ -4,7 +4,7 @@ def delete_keyboard():
     markup = types.ReplyKeyboardRemove(selective=False)
     return markup
 def priority_key():
-    markup = types.ReplyKeyboardMarkup(row_width=2)  # клавиатура
+    markup = types.ReplyKeyboardMarkup(row_width=2)
     c1 = types.KeyboardButton('Экзамены')
     c2 = types.KeyboardButton('Изучение языков')
     c3 = types.KeyboardButton('Путешествие')
@@ -14,7 +14,7 @@ def priority_key():
     return markup
 
 def time_key():
-    markup= types.ReplyKeyboardMarkup(row_width=2)  # клавиатура
+    markup= types.ReplyKeyboardMarkup(row_width=2)
     c1 = types.KeyboardButton('12:00')
     c2 = types.KeyboardButton('15:00')
     c3 = types.KeyboardButton('18:00')
@@ -23,13 +23,13 @@ def time_key():
     return markup
 
 def complete_key():
-    markup= types.ReplyKeyboardMarkup(resize_keyboard=True)  # клавиатура
+    markup= types.ReplyKeyboardMarkup(resize_keyboard=True)
     c1 = types.KeyboardButton('Завершить')
     markup.add(c1)
     return markup
 
 def as_note_key():
-    markup= types.ReplyKeyboardMarkup(resize_keyboard=True)  # клавиатура
+    markup= types.ReplyKeyboardMarkup(resize_keyboard=True)
     c1 = types.KeyboardButton('Сохранить как заметку')
     markup.add(c1)
     return markup
