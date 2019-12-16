@@ -52,7 +52,7 @@ try:
         time = message.text
         if(time == 'Сохранить как заметку'):
             just_note(message)
-            bot.send_message(message.chat.id, "Готово",reply_markup=keyboards.delete_keyboard())
+            bot.send_message(message.chat.id, "Готово\n/notes - посмотреть заметки\n/del_notes - удалить заметки",reply_markup=keyboards.delete_keyboard())
             return 0
         l = len(time)
         if (l == 5):
@@ -180,7 +180,7 @@ try:
             bot.register_next_step_handler(message, is_time_correct)
 
     def set_time(message): # установка времени для приоритета
-        bot.send_message(message.chat.id, "Время принято", reply_markup=keyboards.delete_keyboard())
+        bot.send_message(message.chat.id, "Ежедневное напоминание создано\n/priority - посмотреть ежедневные напоминания\n/del_priority - удалить ежедневные напоминания", reply_markup=keyboards.delete_keyboard())
         ctime = message.text
         if not ':' in ctime:
             if len(ctime)==4:
@@ -292,7 +292,7 @@ try:
             bot.send_message(message.chat.id, "Введите следующий номер или нажмите Завершить", reply_markup=keyboards.complete_key())
             bot.register_next_step_handler(message, del_notes)
         else:
-            bot.send_message(message.chat.id, "Должно быть натуральное число")
+            bot.send_message(message.chat.id, "Должно быть натуральное число меньше "+ str(count+1))
             bot.register_next_step_handler(message, del_notes)
 
     @bot.message_handler(commands=['priority'])
@@ -352,7 +352,7 @@ try:
         bot.register_next_step_handler(message, is_note_time_correct)
 
     def set_note_time(message):
-        bot.send_message(message.chat.id, "Время принято",reply_markup=keyboards.delete_keyboard())
+        bot.send_message(message.chat.id, "Напоминание создано",reply_markup=keyboards.delete_keyboard())
         ctime = message.text
         if not ':' in ctime:
             if len(ctime)==4:
