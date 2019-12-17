@@ -183,11 +183,11 @@ try:
     def set_user_time(message, q = True): # установка времени для советов
         if q:
             bd_def.set_user_time(message.chat.id,message.text)
-            bot.send_message(message.chat.id, "Время принято\n /set_time - изменить время")
+            bot.send_message(message.chat.id, "Время принято\n /set_time - изменить время\n /advice - получить совет")
             report(message,'set_user_time',message.text)
         else:
             bd_def.set_user_time(message.chat.id, "None")
-            bot.send_message(message.chat.id, "Готово")
+            bot.send_message(message.chat.id, "Готово\n /advice - получить совет")
             report(message,'set_user_time',"None")
         global k
         k = False
@@ -392,6 +392,26 @@ try:
         else:
             bot.send_message(message.chat.id, "Должно быть натуральное число меньше "+ str(count+1))
             bot.register_next_step_handler(message, del_priority)
+
+    @bot.message_handler(commands=['advice'])
+    def send_advice(message):
+        advices = bd_def.get_from_bd('advices', 'advice')
+        rand = random.randint(0, len(advices) - 1)
+        try:
+            bot.send_message(message.chat.id, advices[rand])
+            report(message, 'advice', advices[rand])
+        except:
+            print(str(message.chat.id) + ' заблокировал бота')
+
+    @bot.message_handler(commands=['add_advice'])
+    def start_add_advice(message):
+        if(message.chat.id == 260009462 or message.chat.id == 944242100):
+            bot.send_message(message.chat.id,"Какой совет добавить?")
+            bot.register_next_step_handler(message, add_advice)
+
+    def add_advice(message):
+        bd_def.add_advice(message.text)
+        bot.send_message(message.chat.id,"Совет добавлен")
 
     @bot.message_handler(content_types=['text'])
     def note(message, q = True): # довавление заметки пользователя

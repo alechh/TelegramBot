@@ -299,3 +299,11 @@ def get_time_for_note(user_id,note):
     l = len(time)
     time = time[:(l-3)]
     return time
+
+def add_advice(advice):
+    con = sqlite3.connect('./database.db')
+    cur = con.cursor()
+    cur.execute('INSERT INTO advices VALUES("'+advice+'")')
+    con.commit()
+    cur.close()
+    con.close()
