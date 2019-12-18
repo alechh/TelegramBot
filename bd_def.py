@@ -307,3 +307,13 @@ def add_advice(advice):
     con.commit()
     cur.close()
     con.close()
+
+def number_of_advices(): # кол-во советов
+    con = sqlite3.connect('./database.db')
+    cur = con.cursor()
+    cur.execute('SELECT COUNT(*) FROM advices')
+    count = str(cur.fetchall())
+    count = count[2:]
+    l = len(count)
+    count = count[:(l - 3)]
+    return int(count)

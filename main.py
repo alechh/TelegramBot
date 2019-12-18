@@ -6,35 +6,9 @@ import datetime
 import bd_def
 import random
 
-bot = telebot.TeleBot(data.get_test_token())  # инициализация бота
+bot = telebot.TeleBot(data.get_token())  # инициализация бота
 
 try:
-    def report(message, event,text=None, prior=None):# отчет в консоль об инициализации пользователя (устаревшая версия)
-        try:
-            if event == 'priority':
-                print(message.chat.first_name + ' выбрал приоритет : '+ message.text)
-            elif event =='time of priority':
-                print(message.chat.first_name + ' выбрал время для приоритета : '+message.text)
-            elif event == "note":
-                print(message.chat.first_name + " добавил заметку : "+ message.text)
-            elif event == "list of notes":
-                print(message.chat.first_name + " посмотрел список заметок")
-            elif event == "message by priority":
-                print(message.chat.first_name + " получил сообщение " +prior+" по времени " + text)
-            elif event == "delete note":
-                print(message.chat.first_name + " удалил заметку")
-            elif event == 'not notes':
-                print('У '+ message.chat.first_name +' нет заметок')
-            elif event == 'delete priority':
-                print(message.chat.first_name + ' удалил приоритет')
-            elif event == 'not priority':
-                print('У ' + message.chat.first_name + ' нет приоритетов')
-            elif event == 'set_user_time':
-                print(message.chat.first_name + ' установил время для советов ' + text)
-            elif event == 'advice':
-                print(message.chat.first_name + ' получил совет : ' + text)
-        except: print('У '+ str(message.chat.id) +' нет username или firstname')
-
     @bot.message_handler(commands=['help'])
     def help(message):
         bot.send_message(message.chat.id,data.get_help())
@@ -173,7 +147,7 @@ try:
             bd_def.add_user(message.chat.id, str(message.chat.username), str(message.chat.first_name), str(message.chat.last_name), 'None', 'None')  # добавление пользователя в базу данных
         else:
             bd_def.update_user(message.chat.id, str(message.chat.username), str(message.chat.first_name), str(message.chat.last_name), 'None', 'None')
-        bot.send_message(message.from_user.id, '/set_daily - установить ежедневные напоминания \n /set_time - установить время отправки советов')
+        bot.send_message(message.from_user.id, '/help - список команд ')
 
     @bot.message_handler(commands=['del_key'])
     def delete_keyboard(message): # удаление клавиатуры в телеграме
@@ -188,11 +162,9 @@ try:
         if q:
             bd_def.set_user_time(message.chat.id,message.text)
             bot.send_message(message.chat.id, "Время принято\n /set_time - изменить время\n /advice - получить совет")
-            report(message,'set_user_time',message.text)
         else:
             bd_def.set_user_time(message.chat.id, "None")
             bot.send_message(message.chat.id, "Готово\n /advice - получить совет")
-            report(message,'set_user_time',"None")
         global k
         k = False
         time.sleep(2)
@@ -215,11 +187,9 @@ try:
             k = False
             time.sleep(2)
             notifications(message)
-            report(message,'success of priority')
             return 0
         else:
             if (q):
-                report(message,'priority')
                 try:
                     number = bd_def.number_of_priority(message)
                 except:
@@ -245,7 +215,6 @@ try:
         k = False
         time.sleep(2)
         notifications(message)
-        report(message,'time of priority')
 
     def error_time(message): # обработка неправильного времени для приоритета
         bot.send_message(message.chat.id,"Неверный формат времени")
@@ -256,7 +225,6 @@ try:
         count = bd_def.number_of_notes(message.chat.id)
         if(count==0):
             bot.send_message(message.chat.id,"У вас нет заметок")
-            report(message,'not notes')
             return 0
         notes = []
         notes = bd_def.get_notes(message.chat.id)
@@ -269,7 +237,6 @@ try:
                 res += str(count)+'. ' + str(i) + '\n'
             count += 1
         bot.send_message(message.chat.id,res)
-        report(message,"list of notes")
 
     @bot.message_handler(commands=['on'])
     def notifications(message): # отправка советов и напоминаний пользователю
@@ -290,7 +257,8 @@ try:
                 month = '0'+str(month)
             current_date= str(day)+'.'+str(month)+'.'+str(year)+' '+str(hour)+':'+str(min)
             current_time = str(hour) + ':' + str(min)
-            print('Итерация '+ current_date)
+            if (int(min) % 30 == 0):
+                print('Итерация '+ current_date)
             info_prior = bd_def.get_prior()
             info_user_time = bd_def.get_users_time()
             info_note_time = bd_def.get_note_time()
@@ -298,7 +266,6 @@ try:
                 if(info_prior[i][2] == current_time):
                     try:
                         bot.send_message(info_prior[i][0],info_prior[i][1])
-                        report(message,'message by priority',current_time,info_prior[i][1])
                     except:
                         print(str(info_prior[i][0]) +' заблокировал бота')
             for i in range(len(info_user_time)):
@@ -307,7 +274,6 @@ try:
                     rand = random.randint(0,len(advices)-1)
                     try:
                         bot.send_message(info_user_time[i][0], advices[rand])
-                        report(message,'advice',advices[rand])
                     except:
                         print(str(info_user_time[i][0])+' заблокировал бота')
             for i in range(len(info_note_time)):
@@ -328,7 +294,6 @@ try:
         count = bd_def.number_of_notes(message.chat.id)
         if (count == 0):
             bot.send_message(message.chat.id, "У вас нет заметок")
-            report(message, 'not notes')
             return 0
         bot.send_message(message.chat.id, "Введите номер заметки, которую хотите удалить",reply_markup=keyboards.complete_key())
         print_notes(message)
@@ -341,7 +306,6 @@ try:
             return 0
         elif (message.text.isdigit() and int(message.text) <= count and int(message.text)>0):
             bd_def.delete_note(message)
-            report(message,'delete note')
             if count ==1 :
                 bot.send_message(message.chat.id, "Готово", reply_markup=keyboards.delete_keyboard())
                 return 0
@@ -356,12 +320,10 @@ try:
     def print_priorities(message): # вывод приоритетов пользователя
         if (not bd_def.table_exists('prior')):
             bot.send_message(message.chat.id,"У вас нет ежедневных напоминаний")
-            report(message,'not priority')
             return 0
         info = bd_def.get_priority(message.chat.id)
         if (len(info) == 0):
             bot.send_message(message.chat.id, "У вас нет ежедневных напоминаний")
-            report(message,'not priority')
             return 0
         res = ''
         for i in range(len(info)):
@@ -373,7 +335,6 @@ try:
         count = bd_def.number_of_priority(message)
         if (count == 0):
             bot.send_message(message.chat.id, "У вас нет ежедневных напоминаний")
-            report(message,'not priority')
             return 0
         bot.send_message(message.chat.id, "Введите номер напоминания, который хотите удалить",reply_markup=keyboards.complete_key())
         print_priorities(message)
@@ -386,7 +347,6 @@ try:
             return 0
         elif (message.text.isdigit() and int(message.text) <= count and int(message.text) >0):
             bd_def.delete_priority(message)
-            report(message,'delete priority')
             if count == 1 :
                 bot.send_message(message.chat.id, "Готово", reply_markup=keyboards.delete_keyboard())
                 return 0
@@ -403,7 +363,6 @@ try:
         rand = random.randint(0, len(advices) - 1)
         try:
             bot.send_message(message.chat.id, advices[rand])
-            report(message, 'advice', advices[rand])
         except:
             print(str(message.chat.id) + ' заблокировал бота')
 
@@ -415,7 +374,7 @@ try:
 
     def add_advice(message):
         bd_def.add_advice(message.text)
-        bot.send_message(message.chat.id,"Совет добавлен")
+        bot.send_message(message.chat.id,"Совет добавлен\nТеперь их: "+str(bd_def.number_of_advices()))
 
     @bot.message_handler(content_types=['text'])
     def note(message, q = True): # довавление заметки пользователя
@@ -451,7 +410,6 @@ try:
     def just_note(message):
         bd_def.just_note(message.chat.id)
         return 0
-
 
     bot.polling()
 
