@@ -6,7 +6,7 @@ import datetime
 import bd_def
 import random
 
-bot = telebot.TeleBot(data.get_token())  # инициализация бота
+bot = telebot.TeleBot(data.get_test_token())  # инициализация бота
 
 try:
     def report(message, event,text=None, prior=None):# отчет в консоль об инициализации пользователя (устаревшая версия)
@@ -34,6 +34,10 @@ try:
             elif event == 'advice':
                 print(message.chat.first_name + ' получил совет : ' + text)
         except: print('У '+ str(message.chat.id) +' нет username или firstname')
+
+    @bot.message_handler(commands=['help'])
+    def help(message):
+        bot.send_message(message.chat.id,data.get_help())
 
     @bot.message_handler(commands=['message_to_users'])
     def start_mtou(message):
@@ -169,7 +173,7 @@ try:
             bd_def.add_user(message.chat.id, str(message.chat.username), str(message.chat.first_name), str(message.chat.last_name), 'None', 'None')  # добавление пользователя в базу данных
         else:
             bd_def.update_user(message.chat.id, str(message.chat.username), str(message.chat.first_name), str(message.chat.last_name), 'None', 'None')
-        bot.send_message(message.from_user.id, '/set_priority - установить ежедневные напоминания \n /set_time - установить время отправки советов')
+        bot.send_message(message.from_user.id, '/set_daily - установить ежедневные напоминания \n /set_time - установить время отправки советов')
 
     @bot.message_handler(commands=['del_key'])
     def delete_keyboard(message): # удаление клавиатуры в телеграме
@@ -199,14 +203,14 @@ try:
         bot.send_message(message.chat.id, "Неверный формат времени.")
         set_u_time(message)
 
-    @bot.message_handler(commands=['set_priority'])
+    @bot.message_handler(commands=['set_daily'])
     def start_prioriry(message): # начало установки приоритетов
         bot.send_message(message.chat.id, "Введите или выберите ежедневное напоминание:", reply_markup=keyboards.priority_key())
         bot.register_next_step_handler(message, set_priority)
 
     def set_priority(message, q = True): # установка приоритетов
         if(message.text == "Завершить"):
-            bot.send_message(message.chat.id, "Готово \n /priority - посмотреть ежедневные напоминания \n /del_priority - удалить ежедневные напоминания",reply_markup=keyboards.delete_keyboard())
+            bot.send_message(message.chat.id, "Готово \n /daily - посмотреть ежедневные напоминания \n /del_daily - удалить ежедневные напоминания",reply_markup=keyboards.delete_keyboard())
             global k
             k = False
             time.sleep(2)
@@ -225,7 +229,7 @@ try:
             bot.register_next_step_handler(message, is_time_correct)
 
     def set_time(message): # установка времени для приоритета
-        bot.send_message(message.chat.id, "Ежедневное напоминание создано\n/priority - посмотреть ежедневные напоминания\n/del_priority - удалить ежедневные напоминания", reply_markup=keyboards.delete_keyboard())
+        bot.send_message(message.chat.id, "Ежедневное напоминание создано\n/daily - посмотреть ежедневные напоминания\n/del_daily - удалить ежедневные напоминания", reply_markup=keyboards.delete_keyboard())
         ctime = message.text
         if not ':' in ctime:
             if len(ctime)==4:
@@ -348,7 +352,7 @@ try:
             bot.send_message(message.chat.id, "Должно быть натуральное число меньше "+ str(count+1))
             bot.register_next_step_handler(message, del_notes)
 
-    @bot.message_handler(commands=['priority'])
+    @bot.message_handler(commands=['daily'])
     def print_priorities(message): # вывод приоритетов пользователя
         if (not bd_def.table_exists('prior')):
             bot.send_message(message.chat.id,"У вас нет ежедневных напоминаний")
@@ -364,7 +368,7 @@ try:
             res = res +str(i+1)+'. '+ info[i][0] + ' ('+info[i][1]+')\n'
         bot.send_message(message.chat.id,res)
 
-    @bot.message_handler(commands=['del_priority'])
+    @bot.message_handler(commands=['del_daily'])
     def start_del_priority(message): # начало удаления приоритетов
         count = bd_def.number_of_priority(message)
         if (count == 0):
