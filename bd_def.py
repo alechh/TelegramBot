@@ -133,10 +133,6 @@ def delete_note_time(number,user_id,note,time): # удаление напоми�
     l = len(count)
     count = count[:(l - 3)]
     count = int(count)
-    print(number)
-    print(user_id)
-    print(note)
-    print(time)
     cur.execute('DELETE FROM notes WHERE note=? AND time=? AND user_id='+str(user_id),(note,time))
     i = int(number)+1
     while i<=count:

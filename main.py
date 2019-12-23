@@ -5,6 +5,7 @@ import time
 import datetime
 import bd_def
 import random
+import traceback
 
 bot = telebot.TeleBot(data.get_token())  # инициализация бота
 
@@ -42,7 +43,6 @@ try:
             chour = time[11:]
             chour = chour[:2]
             cmin = time[14:]
-            print(cmin)
             q = True
         elif(len(time)==15):
             cday = time[:2]
@@ -414,5 +414,5 @@ try:
     bot.polling()
 
 except Exception as err:
-    bot.send_message(260009462, "Ошибка:  \n" + str(err))
+    bot.send_message(260009462, "Ошибка: " + str(err) + '\n' + str(traceback.format_exc()))
 
