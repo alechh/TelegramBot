@@ -7,6 +7,7 @@ import bd_def
 import random
 import traceback
 
+
 bot = telebot.TeleBot(data.get_token())  # инициализация бота
 
 try:
@@ -411,7 +412,14 @@ try:
         bd_def.just_note(message.chat.id)
         return 0
 
-    bot.polling()
+    while True:
+        try:
+            bot.polling()
+        except Exception as e:
+            bot.send_message(260009462, "Поломка: " + str(e) + '\n' + str(traceback.format_exc()))
+            time.sleep(10)
+            bot.send_message(260009462, "Работаю")
+
 
 except Exception as err:
     bot.send_message(260009462, "Ошибка: " + str(err) + '\n' + str(traceback.format_exc()))
