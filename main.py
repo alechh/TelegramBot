@@ -7,7 +7,6 @@ import bd_def
 import random
 import traceback
 
-
 bot = telebot.TeleBot(data.get_token())  # инициализация бота
 
 try:
@@ -32,7 +31,7 @@ try:
         time = message.text
         if(time == 'Сохранить как заметку'):
             just_note(message)
-            bot.send_message(message.chat.id, "Готово\n/notes - посмотреть заметки\n/del_notes - удалить заметки",reply_markup=keyboards.delete_keyboard())
+            bot.send_message(message.chat.id, "Готово ✅\n/notes - посмотреть заметки\n/del_notes - удалить заметки",reply_markup=keyboards.delete_keyboard())
             return 0
         q = False
         if(len(time) == 16):
@@ -150,7 +149,7 @@ try:
 
     @bot.message_handler(commands=['del_key'])
     def delete_keyboard(message): # удаление клавиатуры в телеграме
-        bot.send_message(message.chat.id, "Клавиатура удалена ", reply_markup=keyboards.delete_keyboard())
+        bot.send_message(message.chat.id, "Клавиатура удалена ✅", reply_markup=keyboards.delete_keyboard())
 
     @bot.message_handler(commands=['set_time'])
     def set_u_time(message): # начало установки времени для советов
@@ -160,10 +159,10 @@ try:
     def set_user_time(message, q = True): # установка времени для советов
         if q:
             bd_def.set_user_time(message.chat.id,message.text)
-            bot.send_message(message.chat.id, "Время принято\n /set_time - изменить время\n /advice - получить совет")
+            bot.send_message(message.chat.id, "Время принято ✅\n /set_time - изменить время\n /advice - получить совет")
         else:
             bd_def.set_user_time(message.chat.id, "None")
-            bot.send_message(message.chat.id, "Готово\n /advice - получить совет")
+            bot.send_message(message.chat.id, "Готово ✅\n /advice - получить совет")
         global k
         k = False
         time.sleep(2)
@@ -171,7 +170,7 @@ try:
         return 0
 
     def error_user_time(message): # обработка неправильного времени для советов
-        bot.send_message(message.chat.id, "Неверный формат времени.")
+        bot.send_message(message.chat.id, "Неверный формат времени ❌")
         set_u_time(message)
 
     @bot.message_handler(commands=['set_daily'])
@@ -181,7 +180,7 @@ try:
 
     def set_priority(message, q = True): # установка приоритетов
         if(message.text == "Завершить"):
-            bot.send_message(message.chat.id, "Готово \n /daily - посмотреть ежедневные напоминания \n /del_daily - удалить ежедневные напоминания",reply_markup=keyboards.delete_keyboard())
+            bot.send_message(message.chat.id, "Готово ✅\n /daily - посмотреть ежедневные напоминания \n /del_daily - удалить ежедневные напоминания",reply_markup=keyboards.delete_keyboard())
             global k
             k = False
             time.sleep(2)
@@ -190,7 +189,7 @@ try:
         else:
             if (q):
                 try:
-                    number = bd_def.number_of_priority(message)
+                    number = bd_def.number_of_priority(message.chat.id)
                 except:
                     number = 0
                 bd_def.set_priority(number+1,message.chat.id,message.chat.username,message.text)
@@ -198,7 +197,7 @@ try:
             bot.register_next_step_handler(message, is_time_correct)
 
     def set_time(message): # установка времени для приоритета
-        bot.send_message(message.chat.id, "Ежедневное напоминание создано\n/daily - посмотреть ежедневные напоминания\n/del_daily - удалить ежедневные напоминания", reply_markup=keyboards.delete_keyboard())
+        bot.send_message(message.chat.id, "Ежедневное напоминание создано ✅\n/daily - посмотреть ежедневные напоминания\n/del_daily - удалить ежедневные напоминания", reply_markup=keyboards.delete_keyboard())
         ctime = message.text
         if not ':' in ctime:
             if len(ctime)==4:
@@ -216,7 +215,7 @@ try:
         notifications(message)
 
     def error_time(message): # обработка неправильного времени для приоритета
-        bot.send_message(message.chat.id,"Неверный формат времени")
+        bot.send_message(message.chat.id,"Неверный формат времени ❌")
         set_priority(message,False)
 
     @bot.message_handler(commands=['notes'])
@@ -237,10 +236,11 @@ try:
             count += 1
         bot.send_message(message.chat.id,res)
 
+    @bot.message_handler(commands=['del_notes'])
     def print_del_notes(message, q = True):
         count = bd_def.number_of_notes(message.chat.id)
-        if(count==0):
-            bot.send_message(message.chat.id,"У вас нет заметок")
+        if (count == 0):
+            bot.send_message(message.chat.id, "У вас нет заметок")
             return 0
         notes = []
         notes = bd_def.get_notes(message.chat.id)
@@ -259,14 +259,24 @@ try:
             bot.edit_message_text(text=res,chat_id=message.chat.id,message_id=message.message_id,reply_markup=key)
 
     @bot.callback_query_handler(func=lambda call: True)
-    def answer(call):
-        number = call.data
-        count = bd_def.number_of_notes(call.message.chat.id)
-        bd_def.delete_note(call)
-        if count == 1:
-            bot.edit_message_text(text="Заметок нет",chat_id=call.message.chat.id,message_id=call.message.message_id)
-            return 0
-        print_del_notes(call.message,False)
+    def query_handler(call):
+        if not "d" in call.data:
+            number = call.data
+            count = bd_def.number_of_notes(call.message.chat.id)
+            bd_def.delete_note(call)
+            if count == 1:
+                bot.edit_message_text(text="Заметок нет ✅",chat_id=call.message.chat.id,message_id=call.message.message_id)
+                return 0
+            print_del_notes(call.message,False)
+        else:
+            number = call.data
+            count = bd_def.number_of_priority(call.message.chat.id)
+            bd_def.delete_priority(call)
+            if count == 1:
+                bot.edit_message_text(text="Напоминаний нет ✅", chat_id=call.message.chat.id,
+                                      message_id=call.message.message_id)
+                return 0
+            print_del_priorities(call.message,False)
 
     @bot.message_handler(commands=['on'])
     def notifications(message): # отправка советов и напоминаний пользователю
@@ -319,16 +329,6 @@ try:
                 time.sleep(1)
         print('Конец цикла')
 
-    @bot.message_handler(commands=['del_notes'])
-    def start_del_nodes(message): # начало удаления заметок
-        count = bd_def.number_of_notes(message.chat.id)
-        if (count == 0):
-            bot.send_message(message.chat.id, "У вас нет заметок")
-            return 0
-        print_del_notes(message)
-
-
-
     @bot.message_handler(commands=['daily'])
     def print_priorities(message): # вывод приоритетов пользователя
         if (not bd_def.table_exists('prior')):
@@ -344,31 +344,19 @@ try:
         bot.send_message(message.chat.id,res)
 
     @bot.message_handler(commands=['del_daily'])
-    def start_del_priority(message): # начало удаления приоритетов
-        count = bd_def.number_of_priority(message)
-        if (count == 0):
+    def print_del_priorities(message,q=True):
+        info = bd_def.get_priority(message.chat.id)
+        if (len(info) == 0):
             bot.send_message(message.chat.id, "У вас нет ежедневных напоминаний")
             return 0
-        bot.send_message(message.chat.id, "Введите номер напоминания, который хотите удалить",reply_markup=keyboards.complete_key())
-        print_priorities(message)
-        bot.register_next_step_handler(message, del_priority)
-
-    def del_priority(message): # удаление приоритетов пользователя
-        count = bd_def.number_of_priority(message)
-        if(message.text == "Завершить"):
-            bot.send_message(message.chat.id, "Готово", reply_markup=keyboards.delete_keyboard())
-            return 0
-        elif (message.text.isdigit() and int(message.text) <= count and int(message.text) >0):
-            bd_def.delete_priority(message)
-            if count == 1 :
-                bot.send_message(message.chat.id, "Готово", reply_markup=keyboards.delete_keyboard())
-                return 0
-            print_priorities(message)
-            bot.send_message(message.chat.id, "Введите следующий номер или нажмите Завершить", reply_markup=keyboards.complete_key())
-            bot.register_next_step_handler(message, del_priority)
+        res = 'Выберите какое напоминание удалить:\n'
+        for i in range(len(info)):
+            res = res + str(i + 1) + '. ' + info[i][0] + ' (' + info[i][1] + ')\n'
+        key =keyboards.inline_daily(len(info))
+        if q:
+            bot.send_message(message.chat.id, res,reply_markup=key)
         else:
-            bot.send_message(message.chat.id, "Должно быть натуральное число меньше "+ str(count+1))
-            bot.register_next_step_handler(message, del_priority)
+            bot.edit_message_text(text=res, chat_id=message.chat.id, message_id=message.message_id, reply_markup=key)
 
     @bot.message_handler(commands=['advice'])
     def send_advice(message):
@@ -387,7 +375,7 @@ try:
 
     def add_advice(message):
         bd_def.add_advice(message.text)
-        bot.send_message(message.chat.id,"Совет добавлен\nТеперь их: "+str(bd_def.number_of_advices()))
+        bot.send_message(message.chat.id,"Совет добавлен ✅\nТеперь их: "+str(bd_def.number_of_advices()))
 
     @bot.message_handler(content_types=['text'])
     def note(message, q = True): # довавление заметки пользователя
@@ -397,11 +385,11 @@ try:
             except:
                 number = 0
             bd_def.add_note(number+1,message.chat.id,message.chat.username,message.text)
-        bot.send_message(message.chat.id,"Нажмите Сохранить как заметку или напишите, когда вам напомнить (ДД.ММ.ГГГГ ЧЧ:ММ)\n(если нужно напомнить в ближайшие сутки, то только время)",reply_markup=keyboards.as_note_key())
+        bot.send_message(message.chat.id,"Сохраните как заметку или введите дату напоминания (дд.мм.гггг чч:мм)\n(если напомнить в ближайшие сутки, то только время)",reply_markup=keyboards.as_note_key())
         bot.register_next_step_handler(message, is_note_time_correct)
 
     def set_note_time(message,curtime):
-        bot.send_message(message.chat.id, "Напоминание создано",reply_markup=keyboards.delete_keyboard())
+        bot.send_message(message.chat.id, "Напоминание создано ✅",reply_markup=keyboards.delete_keyboard())
         if not ':' in curtime:
             if len(curtime)==4:
                 h = curtime[:2]
@@ -417,7 +405,7 @@ try:
         notifications(message)
 
     def error_note_time(message):
-        bot.send_message(message.chat.id, "Неверный формат даты или этот день уже прошел")
+        bot.send_message(message.chat.id, "Неверный формат даты или этот день уже прошел ❌")
         note(message,False)
 
     def just_note(message):
@@ -431,7 +419,6 @@ try:
             bot.send_message(260009462, "Поломка: " + str(e) + '\n' + str(traceback.format_exc()))
             time.sleep(10)
             bot.send_message(260009462, "Работаю")
-
 
 except Exception as err:
     bot.send_message(260009462, "Ошибка: " + str(err) + '\n' + str(traceback.format_exc()))

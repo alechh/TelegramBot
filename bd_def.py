@@ -165,30 +165,31 @@ def get_priority(user_id): # получение приоритетов поль�
             info[i].append(rows[i][j])
     return info
 
-def number_of_priority(message): # кол-во приоритетов пользователя
+def number_of_priority(chat_id): # кол-во приоритетов пользователя
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
-    cur.execute('SELECT COUNT(*) FROM prior WHERE user_id='+ str(message.chat.id) )
+    cur.execute('SELECT COUNT(*) FROM prior WHERE user_id='+ str(chat_id) )
     count = str(cur.fetchall())
     count = count[2:]
     l = len(count)
     count = count[:(l - 3)]
     return int(count)
 
-def delete_priority(message): # удаление приоритетов
+def delete_priority(call): # удаление приоритетов
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
-    cur.execute('SELECT COUNT(*) FROM prior WHERE user_id=' + str(message.chat.id))
+    cur.execute('SELECT COUNT(*) FROM prior WHERE user_id=' + str(call.message.chat.id))
     count = str(cur.fetchall())
     count = count[2:]
     l = len(count)
     count = count[:(l - 3)]
     count = int(count)
-    cur.execute('DELETE FROM prior WHERE user_id='+str(message.chat.id)+' and number=' + message.text)
-    i = int(message.text)+1
+    data = call.data[2:]
+    cur.execute('DELETE FROM prior WHERE user_id='+str(call.message.chat.id)+' and number=' + data)
+    i = int(data)+1
     while i<=count:
         cur.execute(
-            'UPDATE prior SET number = ' + str(i-1) + ' WHERE number = ' + str(i) +' and user_id='+ str(message.chat.id))
+            'UPDATE prior SET number = ' + str(i-1) + ' WHERE number = ' + str(i) +' and user_id='+ str(call.message.chat.id))
         i = i + 1
     con.commit()
     cur.close()

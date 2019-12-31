@@ -37,7 +37,20 @@ def as_note_key():
 def inline_note(number):
     keyboard = types.InlineKeyboardMarkup()
     buttons = []
+    if(number ==1):
+        buttons.append(types.InlineKeyboardButton(text=str(1),callback_data=str(1)))
     for i in range(int(number)-1):
         buttons.append(types.InlineKeyboardButton(text=str(i+1),callback_data=str(i+1)))
+    keyboard.row(*buttons)
+    return keyboard
+
+def inline_daily(number):
+    keyboard = types.InlineKeyboardMarkup()
+    buttons = []
+    if(number ==1):
+        keyboard.row(types.InlineKeyboardButton(text=str(1),callback_data="d_1"))
+        return keyboard
+    for i in range(int(number)):
+        buttons.append(types.InlineKeyboardButton(text=str(i+1),callback_data="d_"+str(i+1)))
     keyboard.row(*buttons)
     return keyboard
