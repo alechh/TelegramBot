@@ -314,3 +314,11 @@ def number_of_advices(): # кол-во советов
     l = len(count)
     count = count[:(l - 3)]
     return int(count)
+
+def cancel_note(user_id):  # добавление категории пользователя
+    con = sqlite3.connect('./database.db')
+    cur = con.cursor()
+    cur.execute("DELETE from notes WHERE user_id="+str(user_id)+" AND time = 0")
+    con.commit()
+    cur.close()
+    con.close()

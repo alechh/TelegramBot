@@ -30,8 +30,9 @@ def complete_key():
 
 def as_note_key():
     markup= types.ReplyKeyboardMarkup(resize_keyboard=True)
-    c1 = types.KeyboardButton('Сохранить как заметку')
-    markup.add(c1)
+    c1 = types.KeyboardButton('Сохранить как заметку ✓')
+    c2 = types.KeyboardButton('Отмена ✖')
+    markup.row(c1,c2)
     return markup
 
 def inline_note(number):

@@ -29,7 +29,11 @@ try:
 
     def is_note_time_correct(message): #проверка на корректность времени для напоминаний
         time = message.text
-        if(time == 'Сохранить как заметку'):
+        if(time == "Отмена ✖"):
+            bd_def.cancel_note(message.chat.id)
+            bot.send_message(message.chat.id, "😉",reply_markup=keyboards.delete_keyboard())
+            return 0
+        if(time == 'Сохранить как заметку ✓'):
             just_note(message)
             bot.send_message(message.chat.id, "Готово ✅\n/notes - посмотреть заметки\n/del_notes - удалить заметки",reply_markup=keyboards.delete_keyboard())
             return 0
@@ -349,7 +353,7 @@ try:
         if (len(info) == 0):
             bot.send_message(message.chat.id, "У вас нет ежедневных напоминаний")
             return 0
-        res = 'Выберите какое напоминание удалить:\n'
+        res = 'Выберите, какое напоминание удалить:\n'
         for i in range(len(info)):
             res = res + str(i + 1) + '. ' + info[i][0] + ' (' + info[i][1] + ')\n'
         key =keyboards.inline_daily(len(info))
