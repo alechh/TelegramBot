@@ -33,3 +33,11 @@ def as_note_key():
     c1 = types.KeyboardButton('Сохранить как заметку')
     markup.add(c1)
     return markup
+
+def inline_note(number):
+    keyboard = types.InlineKeyboardMarkup()
+    buttons = []
+    for i in range(int(number)-1):
+        buttons.append(types.InlineKeyboardButton(text=str(i+1),callback_data=str(i+1)))
+    keyboard.row(*buttons)
+    return keyboard

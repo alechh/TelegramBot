@@ -105,20 +105,20 @@ def number_of_notes(user_id): # кол-во заметок пользовате�
     count = count[:(l - 3)]
     return int(count)
 
-def delete_note(message): # удаление заметки пользователя
+def delete_note(call): # удаление заметки пользователя
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
-    cur.execute('SELECT COUNT(*) FROM notes WHERE user_id='+str(message.chat.id))
+    cur.execute('SELECT COUNT(*) FROM notes WHERE user_id='+str(call.message.chat.id))
     count = str(cur.fetchall())
     count = count[2:]
     l = len(count)
     count = count[:(l - 3)]
     count = int(count)
-    cur.execute('DELETE FROM notes WHERE user_id='+str(message.chat.id)+' AND number=' + message.text)
-    i = int(message.text)+1
+    cur.execute('DELETE FROM notes WHERE user_id='+str(call.message.chat.id)+' AND number=' + call.data)
+    i = int(call.data)+1
     while i<=count:
         cur.execute(
-            'UPDATE notes SET number = ' + str(i-1) + ' WHERE user_id='+str(message.chat.id)+' AND number = ' + str(i))
+            'UPDATE notes SET number = ' + str(i-1) + ' WHERE user_id='+str(call.message.chat.id)+' AND number = ' + str(i))
         i = i + 1
     con.commit()
     cur.close()

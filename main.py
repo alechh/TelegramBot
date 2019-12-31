@@ -142,9 +142,7 @@ try:
     @bot.message_handler(commands=['start'])
     def start(message):
         bot.send_message(message.chat.id, data.get_greeting())
-        if (not bd_def.table_exists('users')):
-            bd_def.add_user(message.chat.id, str(message.chat.username), str(message.chat.first_name), str(message.chat.last_name), 'None', 'None')
-        elif(not bd_def.user_exists('users',message.chat.id)):
+        if(not bd_def.user_exists('users',message.chat.id)):
             bd_def.add_user(message.chat.id, str(message.chat.username), str(message.chat.first_name), str(message.chat.last_name), 'None', 'None')  # добавление пользователя в базу данных
         else:
             bd_def.update_user(message.chat.id, str(message.chat.username), str(message.chat.first_name), str(message.chat.last_name), 'None', 'None')
@@ -239,6 +237,37 @@ try:
             count += 1
         bot.send_message(message.chat.id,res)
 
+    def print_del_notes(message, q = True):
+        count = bd_def.number_of_notes(message.chat.id)
+        if(count==0):
+            bot.send_message(message.chat.id,"У вас нет заметок")
+            return 0
+        notes = []
+        notes = bd_def.get_notes(message.chat.id)
+        res = 'Выберите заметку, которую хотите удалить:\n'
+        count = 1
+        for i in notes:
+            if(bd_def.get_time_for_note(message.chat.id,str(i)) != 'None'):
+                res += str(count) + '. ' + str(i) +' ('+bd_def.get_time_for_note(message.chat.id,str(i)) +')\n'
+            else:
+                res += str(count)+'. ' + str(i) + '\n'
+            count += 1
+        key= keyboards.inline_note(count)
+        if q:
+            bot.send_message(message.chat.id,res,reply_markup=key)
+        else:
+            bot.edit_message_text(text=res,chat_id=message.chat.id,message_id=message.message_id,reply_markup=key)
+
+    @bot.callback_query_handler(func=lambda call: True)
+    def answer(call):
+        number = call.data
+        count = bd_def.number_of_notes(call.message.chat.id)
+        bd_def.delete_note(call)
+        if count == 1:
+            bot.edit_message_text(text="Заметок нет",chat_id=call.message.chat.id,message_id=call.message.message_id)
+            return 0
+        print_del_notes(call.message,False)
+
     @bot.message_handler(commands=['on'])
     def notifications(message): # отправка советов и напоминаний пользователю
         global k
@@ -296,26 +325,9 @@ try:
         if (count == 0):
             bot.send_message(message.chat.id, "У вас нет заметок")
             return 0
-        bot.send_message(message.chat.id, "Введите номер заметки, которую хотите удалить",reply_markup=keyboards.complete_key())
-        print_notes(message)
-        bot.register_next_step_handler(message, del_notes)
+        print_del_notes(message)
 
-    def del_notes(message): # удаление заметок пользователя
-        count = bd_def.number_of_notes(message.chat.id)
-        if(message.text == "Завершить"):
-            bot.send_message(message.chat.id, "Готово", reply_markup=keyboards.delete_keyboard())
-            return 0
-        elif (message.text.isdigit() and int(message.text) <= count and int(message.text)>0):
-            bd_def.delete_note(message)
-            if count ==1 :
-                bot.send_message(message.chat.id, "Готово", reply_markup=keyboards.delete_keyboard())
-                return 0
-            print_notes(message)
-            bot.send_message(message.chat.id, "Введите следующий номер или нажмите Завершить", reply_markup=keyboards.complete_key())
-            bot.register_next_step_handler(message, del_notes)
-        else:
-            bot.send_message(message.chat.id, "Должно быть натуральное число меньше "+ str(count+1))
-            bot.register_next_step_handler(message, del_notes)
+
 
     @bot.message_handler(commands=['daily'])
     def print_priorities(message): # вывод приоритетов пользователя
