@@ -3,14 +3,14 @@ from telebot import types
 def delete_keyboard():
     markup = types.ReplyKeyboardRemove(selective=False)
     return markup
-def priority_key():
+def daily_key():
     markup = types.ReplyKeyboardMarkup(row_width=2)
     c1 = types.KeyboardButton('Экзамены')
     c2 = types.KeyboardButton('Изучение языков')
     c3 = types.KeyboardButton('Путешествие')
     c4 = types.KeyboardButton('Спорт')
     c5 = types.KeyboardButton('Завершить')
-    markup.add(c1, c2, c3, c4,c5)
+    markup.add(c1, c2, c3, c4, c5)
     return markup
 
 def time_key():

@@ -1,20 +1,14 @@
 import sqlite3
 
 def add_user(user_id,username,firstname,secondname,name,time): # добавление пользователя в базу данных
-        #подключение к базе данных
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
-        #создание таблицы, если она еще не создана
-    cur.execute('CREATE TABLE IF NOT EXISTS users(user_id INT, username TEXT, firstname TEXT, secondname TEXT, name TEXT,time TEXT, UNIQUE(user_id,username,firstname,secondname,name,time))')
-        #добавление пользователя в таблицу
     cur.execute('INSERT OR IGNORE INTO users VALUES(' + str(user_id) + ',"' + username + '", "' + firstname + '", "' + secondname + '", "'+ name +'", "'+str(time)+'")')
-        #сохранение изменений в базе данных
     con.commit()
-        #отключение от базы данных
     cur.close()
     con.close()
 
-def set_user_time(user_id,time):  # добавление категории пользователя
+def set_advice_time(user_id,time):
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('UPDATE OR IGNORE users SET time = "'+str(time) +'" WHERE user_id ='+str(user_id))
@@ -22,7 +16,7 @@ def set_user_time(user_id,time):  # добавление категории по
     cur.close()
     con.close()
 
-def set_note_time(user_id,time):  # добавление категории пользователя
+def set_note_time(user_id,time):
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('UPDATE OR IGNORE notes SET time = "'+str(time) +'" WHERE user_id='+str(user_id)+' AND time =0')
@@ -30,7 +24,7 @@ def set_note_time(user_id,time):  # добавление категории по
     cur.close()
     con.close()
 
-def just_note(user_id):  # добавление категории пользователя
+def just_note(user_id):
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('UPDATE OR IGNORE notes SET time = "None" WHERE user_id='+str(user_id)+' AND time =0')
@@ -38,21 +32,15 @@ def just_note(user_id):  # добавление категории пользо�
     cur.close()
     con.close()
 
-def set_priority(number,user_id,username,priority): # добавление приоритета польщователя
+def set_daily(number,user_id,username,priority):
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
-    # создание таблицы, если она еще не создана
-    cur.execute(
-        'CREATE TABLE IF NOT EXISTS prior(number INT,user_id INT, username TEXT, priority TEXT, time TEXT)')
-    # добавление пользователя в таблицу
     cur.execute('INSERT INTO prior VALUES(' +str(number) +',' + str(user_id) + ',"' + str(username) + '","'+priority+'","None")')
-    # сохранение изменений в базе данных
     con.commit()
-    # отключение от базы данных
     cur.close()
     con.close()
 
-def set_time(user_id,time): # установка времени для приоритета пользователя
+def set_daily_time(user_id,time):
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('UPDATE prior SET time = "'+str(time) +'" WHERE user_id ='+str(user_id) +' and time="None"')
@@ -82,7 +70,7 @@ def get_notes(user_id): # получение заметок конкретног
         notes.append(row)
     return notes
 
-def get_prior(): # получение приоритетов пользователя (для функции отправки уведомления по времени)
+def get_daily_n(): # получение приоритетов пользователя (for notifications)
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT user_id,priority,time FROM prior')
@@ -152,7 +140,7 @@ def table_exists(name): # проверка на существование та�
         return False
     return True
 
-def get_priority(user_id): # получение приоритетов пользователя
+def get_daily(user_id): # получение приоритетов пользователя
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT priority,time FROM prior WHERE user_id='+ str(user_id))
@@ -165,7 +153,7 @@ def get_priority(user_id): # получение приоритетов поль�
             info[i].append(rows[i][j])
     return info
 
-def number_of_priority(chat_id): # кол-во приоритетов пользователя
+def number_of_daily(chat_id): # кол-во приоритетов пользователя
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT COUNT(*) FROM prior WHERE user_id='+ str(chat_id) )
@@ -175,7 +163,7 @@ def number_of_priority(chat_id): # кол-во приоритетов польз
     count = count[:(l - 3)]
     return int(count)
 
-def delete_priority(call): # удаление приоритетов
+def delete_daily(call): # удаление приоритетов
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT COUNT(*) FROM prior WHERE user_id=' + str(call.message.chat.id))
@@ -220,18 +208,7 @@ def update_user(user_id, username, firstname, secondname, name, time): # обн�
     cur.close()
     con.close()
 
-def get_time_by_user_id(user_id):
-    con = sqlite3.connect('./database.db')
-    cur = con.cursor()
-    cur.execute('SELECT time FROM users WHERE user_id='+ str(user_id))
-    info = cur.fetchall()
-    info = str(info[0])
-    info = info[2:]
-    l = len(info)
-    info = info[:(l - 3)]
-    return info
-
-def get_from_bd(table, column): # колонки column из таблицы table
+def get_column_from_table(table, column): # column из таблицы table
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT '+column+' FROM ' + table)
@@ -249,7 +226,7 @@ def get_from_bd(table, column): # колонки column из таблицы tabl
         info.append(row)
     return info
 
-def get_note_time(): # получение заметок пользователя (для функции отправки уведомления по времени)
+def get_users_notes_n(): # получение заметок пользователя (for notifications)
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT number,user_id,note,time FROM notes')
@@ -262,7 +239,7 @@ def get_note_time(): # получение заметок пользовател�
             info[i].append(rows[i][j])
     return info
 
-def get_users_time(): # получение приоритетов пользователя (для функции отправки уведомления по времени)
+def get_advice_time_n(): # получение времени отправки советов (for nitifications)
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT user_id,time FROM users')
@@ -286,7 +263,7 @@ def get_advice_time(user_id):
     time = time[:(l-3)]
     return time
 
-def get_time_for_note(user_id,note):
+def get_note_time(user_id,note):
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT time FROM notes WHERE user_id=? AND note=?',(str(user_id),note))
@@ -315,7 +292,7 @@ def number_of_advices(): # кол-во советов
     count = count[:(l - 3)]
     return int(count)
 
-def cancel_note(user_id):  # добавление категории пользователя
+def cancel_note(user_id):
     con = sqlite3.connect('./database.db')
     cur = con.cursor()
     cur.execute("DELETE from notes WHERE user_id="+str(user_id)+" AND time = 0")
