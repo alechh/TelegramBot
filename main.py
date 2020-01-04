@@ -16,11 +16,13 @@ try:
     def del_keyboard(message):
         bot.send_message(message.chat.id, "Клавиатура удалена ✅", reply_markup=keyboards.del_keyboard())
 
+
     @bot.message_handler(commands=['message_to_users'])
     def message_to_users(message):
         if data.is_me(message.chat.id):
             bot.send_message(message.chat.id, "Что написать пользователям ?")
             bot.register_next_step_handler(message, send_message_to_users)
+
 
     def send_message_to_users(message):
         info = bd_def.get_column_from_table('users', 'user_id')
@@ -30,19 +32,23 @@ try:
             except IndexError:
                 print(i + ' заблокировал бота')
 
+
     @bot.message_handler(commands=['add_advice'])
     def start_add_advice(message):
         if data.is_admins(message.chat.id):
             bot.send_message(message.chat.id, "Какой совет добавить?")
             bot.register_next_step_handler(message, add_advice)
 
+
     def add_advice(message):
         bd_def.add_advice(message.text)
         bot.send_message(message.chat.id, "Совет добавлен ✅\nТеперь их: " + str(bd_def.number_of_advices()))
 
+
     @bot.message_handler(commands=['help'])
     def send_help(message):
         bot.send_message(message.chat.id, data.get_help())
+
 
     @bot.message_handler(commands=['start'])
     def start(message):
@@ -56,8 +62,11 @@ try:
                                str(message.chat.last_name), 'None', 'None')
         bot.send_message(message.chat.id, '/help - список команд ')
 
+
     @bot.message_handler(commands=['on'])
-    def notifications():
+    def notifications(message="None"):
+        if data.is_me(message.chat.id):
+            bot.send_message(message.chat.id, "👌")
         global k
         k = True
         print('Начало цикла')
@@ -108,12 +117,14 @@ try:
                 time.sleep(1)
         print('Конец цикла')
 
+
     @bot.message_handler(commands=['set_time'])
     def advice_time(message):
         bot.send_message(message.chat.id, "Установленное время : " + bd_def.get_advice_time(
             message.chat.id) + "\nВведите время, когда вам было бы удобно получать советы (например, 12:00)\nЕсли "
                                "хотите отключить отправку советов, напишите -")
         bot.register_next_step_handler(message, set_advice_time)
+
 
     def set_advice_time(message):
         if message.text == "-":
@@ -129,11 +140,13 @@ try:
         else:
             error_advice_time(message)
 
+
     def error_advice_time(message):
         bot.send_message(message.chat.id, "Неверный формат времени ❌")
         bot.send_message(message.chat.id, "Введите время, когда вам было бы удобно получать советы (например, "
                                           "12:00)\nЕсли хотите отключить отправку советов, напишите -")
         bot.register_next_step_handler(message, set_advice_time)
+
 
     @bot.message_handler(commands=['advice'])
     def send_advice(message):
@@ -143,6 +156,7 @@ try:
             bot.send_message(message.chat.id, advices[rand])
         except IndexError:
             print(str(message.chat.id) + ' заблокировал бота')
+
 
     @bot.message_handler(commands=['daily'])
     def print_daily(message):
@@ -158,11 +172,13 @@ try:
             res = res + str(i + 1) + '. ' + info[i][0] + ' (' + info[i][1] + ')\n'
         bot.send_message(message.chat.id, res)
 
+
     @bot.message_handler(commands=['set_daily'])
     def start_daily(message):
         bot.send_message(message.chat.id, "Введите или выберите ежедневное напоминание:",
                          reply_markup=keyboards.daily_key())
         bot.register_next_step_handler(message, daily)
+
 
     def daily(message):
         if message.text == "Завершить":
@@ -182,6 +198,7 @@ try:
             bot.send_message(message.chat.id, "Выберите или введите время", reply_markup=keyboards.time_key())
             bot.register_next_step_handler(message, set_daily)
 
+
     def set_daily(message):
         if time_def.is_daily_time_correct(message):
             bot.send_message(message.chat.id, "Ежедневное напоминание создано ✅\n/daily - посмотреть ежедневные "
@@ -194,10 +211,12 @@ try:
         else:
             error_daily_time(message)
 
+
     def error_daily_time(message):
         bot.send_message(message.chat.id, "Неверный формат времени ❌")
         bot.send_message(message.chat.id, "Выберите или введите время", reply_markup=keyboards.time_key())
         bot.register_next_step_handler(message, set_daily)
+
 
     @bot.message_handler(commands=['del_daily'])
     def print_del_daily(message, q=True):
@@ -213,6 +232,7 @@ try:
             bot.send_message(message.chat.id, res, reply_markup=key)
         else:
             bot.edit_message_text(text=res, chat_id=message.chat.id, message_id=message.message_id, reply_markup=key)
+
 
     @bot.message_handler(commands=['notes'])
     def print_notes(message):
@@ -230,6 +250,7 @@ try:
                 res += str(count) + '. ' + str(i) + '\n'
             count += 1
         bot.send_message(message.chat.id, res)
+
 
     @bot.message_handler(commands=['del_notes'])
     def print_del_notes(message, q=True):
@@ -252,6 +273,7 @@ try:
         else:
             bot.edit_message_text(text=res, chat_id=message.chat.id, message_id=message.message_id, reply_markup=key)
 
+
     @bot.message_handler(content_types=['text'])
     def note(message, q=True):
         if q:
@@ -264,6 +286,7 @@ try:
                                           "если напомнить в ближайшие сутки, то только время)",
                          reply_markup=keyboards.as_note_key())
         bot.register_next_step_handler(message, set_note)
+
 
     def set_note(message):
         if message.text == "Сохранить как заметку ✓":
@@ -284,6 +307,7 @@ try:
         else:
             error_note_time(message)
 
+
     def error_note_time(message):
         bot.send_message(message.chat.id, "Неверный формат даты или этот день уже прошел ❌")
         bot.send_message(message.chat.id, "Сохраните как заметку или введите дату напоминания (дд.мм.гггг чч:мм)\n("
@@ -291,9 +315,11 @@ try:
                          reply_markup=keyboards.as_note_key())
         bot.register_next_step_handler(message, set_note)
 
+
     def just_note(message):
         bd_def.just_note(message.chat.id)
         return 0
+
 
     @bot.callback_query_handler(func=lambda call: True)
     def query_handler(call):
@@ -313,6 +339,7 @@ try:
                                       message_id=call.message.message_id)
                 return 0
             print_del_daily(call.message, False)
+
 
     while True:
         try:
