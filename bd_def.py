@@ -1,8 +1,8 @@
-import sqlite3
+import psycopg2
 
 
 def add_user(user_id, username, firstname, secondname, name, time):  # добавление пользователя в базу данных
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('INSERT OR IGNORE INTO users VALUES(' + str(
         user_id) + ',"' + username + '", "' + firstname + '", "' + secondname + '", "' + name + '", "' + str(
@@ -13,7 +13,7 @@ def add_user(user_id, username, firstname, secondname, name, time):  # доба�
 
 
 def set_advice_time(user_id, time):
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('UPDATE OR IGNORE users SET time = "' + str(time) + '" WHERE user_id =' + str(user_id))
     con.commit()
@@ -22,7 +22,7 @@ def set_advice_time(user_id, time):
 
 
 def set_note_time(user_id, time):
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('UPDATE OR IGNORE notes SET time = "' + str(time) + '" WHERE user_id=' + str(user_id) + ' AND time =0')
     con.commit()
@@ -31,7 +31,7 @@ def set_note_time(user_id, time):
 
 
 def just_note(user_id):
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('UPDATE OR IGNORE notes SET time = "None" WHERE user_id=' + str(user_id) + ' AND time =0')
     con.commit()
@@ -40,7 +40,7 @@ def just_note(user_id):
 
 
 def set_daily(number, user_id, username, priority):
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('INSERT INTO prior VALUES(' + str(number) + ',' + str(user_id) + ',"' + str(
         username) + '","' + priority + '","None")')
@@ -50,7 +50,7 @@ def set_daily(number, user_id, username, priority):
 
 
 def set_daily_time(user_id, time):
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('UPDATE prior SET time = "' + str(time) + '" WHERE user_id =' + str(user_id) + ' and time="None"')
     con.commit()
@@ -59,7 +59,7 @@ def set_daily_time(user_id, time):
 
 
 def add_note(number, user_id, username, note):  # добавление заметки пользователя
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute(
         'INSERT INTO notes VALUES(' + str(number) + ',' + str(user_id) + ',"' + str(username) + '","' + note + '","0")')
@@ -69,7 +69,7 @@ def add_note(number, user_id, username, note):  # добавление заме�
 
 
 def get_notes(user_id):  # получение заметок конкретного пользователя
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT note FROM notes WHERE user_id =' + str(user_id))
     rows = cur.fetchall()
@@ -84,7 +84,7 @@ def get_notes(user_id):  # получение заметок конкретно�
 
 
 def get_daily_n():  # получение приоритетов пользователя (for notifications)
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT user_id,priority,time FROM prior')
     rows = cur.fetchall()
@@ -98,7 +98,7 @@ def get_daily_n():  # получение приоритетов пользова
 
 
 def number_of_notes(user_id):  # кол-во заметок пользователя
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT COUNT(*) FROM notes WHERE user_id=' + str(user_id))
     count = str(cur.fetchall())
@@ -109,7 +109,7 @@ def number_of_notes(user_id):  # кол-во заметок пользовате
 
 
 def delete_note(call):  # удаление заметки пользователя
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT COUNT(*) FROM notes WHERE user_id=' + str(call.message.chat.id))
     count = str(cur.fetchall())
@@ -130,7 +130,7 @@ def delete_note(call):  # удаление заметки пользовател
 
 
 def delete_note_time(number, user_id, note, time):  # удаление напоминания после отправки
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT COUNT(*) FROM notes WHERE user_id=' + str(user_id))
     count = str(cur.fetchall())
@@ -150,7 +150,7 @@ def delete_note_time(number, user_id, note, time):  # удаление напо�
 
 
 def table_exists(name):  # проверка на существование таблицы
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT name FROM sqlite_master WHERE type=\'table\' AND name=\'' + name + '\';')
     res = cur.fetchall()
@@ -160,7 +160,7 @@ def table_exists(name):  # проверка на существование та
 
 
 def get_daily(user_id):  # получение приоритетов пользователя
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT priority,time FROM prior WHERE user_id=' + str(user_id))
     rows = cur.fetchall()
@@ -174,7 +174,7 @@ def get_daily(user_id):  # получение приоритетов польз�
 
 
 def number_of_daily(chat_id):  # кол-во приоритетов пользователя
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT COUNT(*) FROM prior WHERE user_id=' + str(chat_id))
     count = str(cur.fetchall())
@@ -185,7 +185,7 @@ def number_of_daily(chat_id):  # кол-во приоритетов пользо
 
 
 def delete_daily(call):  # удаление приоритетов
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT COUNT(*) FROM prior WHERE user_id=' + str(call.message.chat.id))
     count = str(cur.fetchall())
@@ -207,7 +207,7 @@ def delete_daily(call):  # удаление приоритетов
 
 
 def user_exists(table, user_id):  # существует ли запись о пользоветеле с user_id в таблице table
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT * FROM ' + table + ' WHERE user_id=' + str(user_id))
     info = str(cur.fetchall())
@@ -222,7 +222,7 @@ def user_exists(table, user_id):  # существует ли запись о п
 
 
 def update_user(user_id, username, firstname, secondname, name, time):  # обновить информацию в таблице users
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('UPDATE users SET username = "' + str(username) + '" WHERE user_id =' + str(user_id))
     cur.execute('UPDATE users SET firstname = "' + str(firstname) + '" WHERE user_id =' + str(user_id))
@@ -236,7 +236,7 @@ def update_user(user_id, username, firstname, secondname, name, time):  # обн
 
 
 def get_column_from_table(table, column):  # column из таблицы table
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT ' + column + ' FROM ' + table)
     rows = cur.fetchall()
@@ -255,7 +255,7 @@ def get_column_from_table(table, column):  # column из таблицы table
 
 
 def get_users_notes_n():  # получение заметок пользователя (for notifications)
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT number,user_id,note,time FROM notes')
     rows = cur.fetchall()
@@ -269,7 +269,7 @@ def get_users_notes_n():  # получение заметок пользоват
 
 
 def get_advice_time_n():  # получение времени отправки советов (for nitifications)
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT user_id,time FROM users')
     rows = cur.fetchall()
@@ -283,7 +283,7 @@ def get_advice_time_n():  # получение времени отправки �
 
 
 def get_advice_time(user_id):
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT time FROM users WHERE user_id=' + str(user_id))
     time = cur.fetchall()
@@ -295,7 +295,7 @@ def get_advice_time(user_id):
 
 
 def get_note_time(user_id, note):
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT time FROM notes WHERE user_id=? AND note=?', (str(user_id), note))
     time = cur.fetchall()
@@ -307,7 +307,7 @@ def get_note_time(user_id, note):
 
 
 def add_advice(advice):
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('INSERT INTO advices VALUES("' + advice + '")')
     con.commit()
@@ -316,7 +316,7 @@ def add_advice(advice):
 
 
 def number_of_advices():  # кол-во советов
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute('SELECT COUNT(*) FROM advices')
     count = str(cur.fetchall())
@@ -327,7 +327,7 @@ def number_of_advices():  # кол-во советов
 
 
 def cancel_note(user_id):
-    con = sqlite3.connect('./database.db')
+    con = psycopg2.connect('./database.db')
     cur = con.cursor()
     cur.execute("DELETE from notes WHERE user_id=" + str(user_id) + " AND time = 0")
     con.commit()
